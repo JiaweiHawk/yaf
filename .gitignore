@@ -1,0 +1,11 @@
+# develop environment
+# kernel source
+kernel/
+# linux rootfs
+rootfs/
+# linux rootfs image
+rootfs.cpio
+# linux kernel symbol
+compile_commands.json
+# share directory
+shares/
