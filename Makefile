@@ -15,9 +15,25 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -nographic
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-shutdown -no-reboot
 
-.PHONY: env kernel run
+.PHONY: env kernel rootfs run
 
-env: kernel
+kernel:
+	if [ ! -d ${PWD}/kernel ]; then \
+		sudo apt-get install -y bc bear bison debootstrap dwarves flex libelf-dev libssl-dev; \
+		wget -O ${PWD}/linux.tar.xz https://mirrors.ustc.edu.cn/kernel.org/linux/kernel/v6.x/linux-6.7.tar.xz; \
+		tar -Jxvf ${PWD}/linux.tar.xz; \
+		mv ${PWD}/linux-6.7 ${PWD}/kernel; \
+		rm -rf ${PWD}/linux.tar.xz; \
+		(cd ${PWD}/kernel && make defconfig); \
+		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_DEBUG_INFO_DWARF5 && yes "" | make oldconfig); \
+		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_GDB_SCRIPTS && yes "" | make oldconfig); \
+		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_X86_X2APIC && yes "" | make oldconfig); \
+	fi
+	bear --append --output ${PWD}/compile_commands.json -- \
+		make -C ${PWD}/kernel -j ${NPROC}
+	@echo -e '\033[0;32m[*]\033[0mbuild the linux kernel'
+
+rootfs:
 	sudo apt-get install -y qemu-system > /dev/null
 	@echo -e '\033[0;32m[*]\033[0minstall the ${QEMU}'
 
@@ -36,21 +52,8 @@ env: kernel
 	cd ${PWD}/rootfs; sudo find . | sudo cpio -o --format=newc -F ${PWD}/rootfs.cpio >/dev/null
 	@echo -e '\033[0;32m[*]\033[0mbuild the rootfs'
 
-kernel:
-	if [ ! -d ${PWD}/kernel ]; then \
-		sudo apt-get install -y bc bear bison debootstrap dwarves flex libelf-dev libssl-dev; \
-		wget -O ${PWD}/linux.tar.xz https://mirrors.ustc.edu.cn/kernel.org/linux/kernel/v6.x/linux-6.7.tar.xz; \
-		tar -Jxvf ${PWD}/linux.tar.xz; \
-		mv ${PWD}/linux-6.7 ${PWD}/kernel; \
-		rm -rf ${PWD}/linux.tar.xz; \
-		(cd ${PWD}/kernel && make defconfig); \
-		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_DEBUG_INFO_DWARF5 && yes "" | make oldconfig); \
-		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_GDB_SCRIPTS && yes "" | make oldconfig); \
-		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_X86_X2APIC && yes "" | make oldconfig); \
-	fi
-	bear --append --output ${PWD}/compile_commands.json -- \
-		make -C ${PWD}/kernel -j ${NPROC}
-	@echo -e '\033[0;32m[*]\033[0mbuild the linux kernel'
+env: kernel rootfs
+	@echo -e '\033[0;32m[*]\033[0mbuild the yaf environment'
 
 run:
 	${QEMU} \
