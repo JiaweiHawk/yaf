@@ -34,9 +34,6 @@ kernel:
 	@echo -e '\033[0;32m[*]\033[0mbuild the linux kernel'
 
 rootfs:
-	sudo apt-get install -y qemu-system > /dev/null
-	@echo -e '\033[0;32m[*]\033[0minstall the ${QEMU}'
-
 	if [ ! -d ${PWD}/rootfs ]; then \
 		sudo apt-get install -y debootstrap > /dev/null; \
 		sudo debootstrap \
