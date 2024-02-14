@@ -6,6 +6,9 @@
 !README.md
 !LICENSE
 
-# patther for driver directory
+# patthen for driver directory
 !driver/Makefile
 !driver/yaf.c
+
+# pattern for tool directory
+!tool/mkfs.c
