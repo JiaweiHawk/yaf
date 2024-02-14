@@ -15,7 +15,13 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -nographic
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-shutdown -no-reboot
 
-.PHONY: env kernel rootfs run
+.PHONY: driver env kernel rootfs run
+
+driver:
+	bear --append --output ${PWD}/compile_commands.json -- \
+		make -C ${PWD}/driver KDIR=${PWD}/kernel -j ${NPROC}
+	cp ${PWD}/driver/yaf.ko ${PWD}/shares
+	@echo -e '\033[0;32m[*]\033[0mbuild the yaf kernel module'
 
 kernel:
 	if [ ! -d ${PWD}/kernel ]; then \
