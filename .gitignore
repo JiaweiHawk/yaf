@@ -16,3 +16,8 @@ driver/*
 !tool
 tool/*
 !tool/mkfs.c
+
+# pattern for files in include directory
+!include
+include/*
+!include/yaf.h

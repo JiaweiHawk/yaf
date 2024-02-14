@@ -1,4 +1,5 @@
 #include <linux/module.h>
+#include "../include/yaf.h"
 
 /* information for module */
 MODULE_LICENSE("GPL");
