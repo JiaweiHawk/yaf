@@ -1,14 +1,18 @@
 # exclude everything except the specific pattern
-/*
+*
 
-# pattern for root directory
+# pattern for files in root directory
 !Makefile
 !README.md
 !LICENSE
 
-# patthern for driver directory
+# pattern for files in driver directory
+!driver
+driver/*
 !driver/Makefile
 !driver/yaf.c
 
-# pattern for tool directory
+# pattern for files in tool directory
+!tool
+tool/*
 !tool/mkfs.c
