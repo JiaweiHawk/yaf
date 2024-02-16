@@ -15,7 +15,7 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -nographic
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-shutdown -no-reboot
 
-.PHONY: driver env kernel rootfs run tool
+.PHONY: driver env kernel rootfs run srcs tool
 
 tool:
 	bear --append --output ${PWD}/compile_commands.json -- \
@@ -28,6 +28,9 @@ driver:
 		make -C ${PWD}/driver KDIR=${PWD}/kernel -j ${NPROC}
 	cp ${PWD}/driver/yaf.ko ${PWD}/shares
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf kernel module'
+
+srcs: driver tool
+	@echo -e '\033[0;32m[*]\033[0mbuild the yaf sources'
 
 kernel:
 	if [ ! -d ${PWD}/kernel ]; then \
@@ -61,7 +64,7 @@ rootfs:
 	cd ${PWD}/rootfs; sudo find . | sudo cpio -o --format=newc -F ${PWD}/rootfs.cpio >/dev/null
 	@echo -e '\033[0;32m[*]\033[0mbuild the rootfs'
 
-env: kernel rootfs
+env: kernel rootfs src
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf environment'
 
 run:
