@@ -12,7 +12,7 @@ With this image, you can try **YAF kernel module** and **YAF user-space tools** 
 
 # Design
 
-## Disk layout
+## Partition layout
 
 ```
     ┌──────────┬─────────────┬──────────────────┬─────────┬───────────┐
