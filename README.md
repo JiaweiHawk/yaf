@@ -24,6 +24,27 @@ With this image, you can try **YAF kernel module** and **YAF user-space tools** 
 BID_SB_MIN BID_IBP_MIN  BID_DBP_MIN   BID_I_MIN    BID_D_MIN    BID_MAX
 ```
 
+## superblock
+
+The superblock contains the metadata for the partition as below:
+
+```
+yaf_sb_info    superblock
+┌──────┐       ┌──────┬────────────────────────────────┐◄──0  bytes
+│nr_ibp◄───────►nr_ibp│number of inode bitmap blocks   │
+├──────┐       ┌──────┼────────────────────────────────┤◄──4  bytes
+│nr_dbp◄───────►nr_dbp│number of data bitmap blocks    │
+├──────┐       ┌──────┼────────────────────────────────┤◄──8  bytes
+│nr_i  ◄───────►nr_i  │number of inode blocks          │
+├──────┐       ┌──────┼────────────────────────────────┤◄──12 bytes
+│nr_d  ◄───────►nr_d  │number of data blocks           │
+├──────┐       ┌──────┼────────────────────────────────┤◄──16 bytes
+│ibp   │       │      │                                │
+├──────┤       │magic │fill with the magic string 'yaf'│
+│dbp   │       │      │                                │
+└──────┘       └──────┴────────────────────────────────┘
+```
+
 # Reference 
 
 1. [psankar/simplefs](https://github.com/psankar/simplefs)
