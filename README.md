@@ -15,13 +15,13 @@ With this image, you can try **YAF kernel module** and **YAF user-space tools** 
 ## Partition layout
 
 ```
-    ┌──────────┬─────────────┬──────────────────┬─────────┬───────────┐
-    │superblock│inode bitmaps│data block bitmaps│inodes   │data blocks│
-    ├──────────┼─────────────┼──────────────────┼─────────┼───────────┤
-    │          │             │                  │         │           │
-    ▼          ▼             ▼                  ▼         ▼           ▼
- BID_MIN   BID_SB_MAX    BID_IB_MAX       BID_DBB_MAX BID_I_MAX   BID_DB_MAX
-BID_SB_MIN BID_IB_MIN    BID_DBB_MIN       BID_I_MIN  BID_DB_MIN   BID_MAX
+    ┌──────────┬─────────────┬────────────┬────────────┬───────────┐
+    │superblock│inode bitmap │data bitmap │inode blocks│data blocks│
+    ├──────────┼─────────────┼────────────┼────────────┼───────────┤
+    │          │             │            │            │           │
+    ▼          ▼             ▼            ▼            ▼           ▼
+ BID_MIN   BID_SB_MAX   BID_IBP_MAX  BID_DBP_MAX   BID_I_MAX   BID_D_MAX
+BID_SB_MIN BID_IBP_MIN  BID_DBP_MIN   BID_I_MIN    BID_D_MIN    BID_MAX
 ```
 
 # Reference 
