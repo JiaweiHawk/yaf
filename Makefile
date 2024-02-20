@@ -64,7 +64,7 @@ rootfs:
 	cd ${PWD}/rootfs; sudo find . | sudo cpio -o --format=newc -F ${PWD}/rootfs.cpio >/dev/null
 	@echo -e '\033[0;32m[*]\033[0mbuild the rootfs'
 
-env: kernel rootfs src
+env: kernel rootfs srcs
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf environment'
 
 run:
