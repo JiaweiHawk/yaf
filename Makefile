@@ -56,9 +56,9 @@ rootfs:
 			stable ${PWD}/rootfs https://mirrors.ustc.edu.cn/debian/; \
 		sudo chroot ${PWD}/rootfs /bin/bash -c "apt install -y gdb strace"; \
 		mkdir shares; \
-		sudo chroot ${PWD}/rootfs /bin/bash -c "echo \"shares /mnt/shares 9p trans=virtio 0 0\" >> /etc/fstab"; \
-		sudo chroot ${PWD}/rootfs /bin/bash -c "echo \"echo -e \\\"The shared folder for host side is at \033[0;31m${PWD}/shares\033[0m\\\"\" >> ~/.bashrc"; \
-		sudo chroot ${PWD}/rootfs /bin/bash -c "echo \"echo -e \\\"The shared folder for guest side is at \033[0;31m/mnt/shares\033[0m\\\"\" >> ~/.bashrc"; \
+		echo "shares /mnt/shares 9p trans=virtio 0 0" | sudo tee -a ${PWD}/rootfs/etc/fstab; \
+		echo "echo -e \"The shared folder for host side is at \033[0;31m${PWD}/shares\033[0m\"" | sudo tee -a ${PWD}/rootfs/root/.bashrc; \
+		echo "echo -e \"The shared folder for guest side is at \033[0;31m/mnt/shares\033[0m\"" | sudo tee -a ${PWD}/rootfs/root/.bashrc; \
 		sudo chroot ${PWD}/rootfs /bin/bash -c "passwd -d root"; \
 	fi
 	cd ${PWD}/rootfs; sudo find . | sudo cpio -o --format=newc -F ${PWD}/rootfs.cpio >/dev/null
