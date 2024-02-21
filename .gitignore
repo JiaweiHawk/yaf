@@ -10,7 +10,7 @@
 !driver
 driver/*
 !driver/Makefile
-!driver/yaf.c
+!driver/fs.c
 
 # pattern for files in tool directory
 !tool

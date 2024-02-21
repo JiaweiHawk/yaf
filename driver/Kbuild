@@ -1,1 +1,2 @@
 obj-m	:= yaf.o
+yaf-y 	:= fs.o
