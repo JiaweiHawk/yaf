@@ -38,11 +38,11 @@ yaf_sb_info    superblock
 │nr_i  ◄───────►nr_i  │number of inode blocks          │
 ├──────┐       ┌──────┼────────────────────────────────┤◄──12 bytes
 │nr_d  ◄───────►nr_d  │number of data blocks           │
-├──────┐       ┌──────┼────────────────────────────────┤◄──16 bytes
-│ibp   │       │      │                                │
-├──────┤       │magic │fill with the magic string 'yaf'│
-│dbp   │       │      │                                │
-└──────┘       └──────┴────────────────────────────────┘
+└──────┘       ┌──────┼────────────────────────────────┤◄──16 bytes
+               │      │                                │
+               │magic │fill with the magic string 'yaf'│
+               │      │                                │
+               └──────┴────────────────────────────────┘
 ```
 
 # Reference 
