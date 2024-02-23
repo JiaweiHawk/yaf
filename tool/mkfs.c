@@ -2,6 +2,6 @@
 
 int main(int argc, char *argv[])
 {
-    log("Running Main File: %s", __FILE__);
+    log(LOG_INFO "mkfs: format the yaf filesystem");
     return 0;
 }

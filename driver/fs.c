@@ -7,13 +7,13 @@ MODULE_AUTHOR("Hawkins Jiawei");
 
 static int yaf_init(void)
 {
-    log("initializing yaf filesystem");
+    log(LOG_INFO "yaf: initialize filesystem");
     return 0;
 }
 
 static void yaf_exit(void)
 {
-    log("clean up yaf filesystem");
+    log(LOG_INFO "yaf: cleanup filesystem");
 }
 
 module_init(yaf_init);
