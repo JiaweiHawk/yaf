@@ -57,9 +57,21 @@ rootfs:
 			stable ${PWD}/rootfs https://mirrors.ustc.edu.cn/debian/; \
 		sudo chroot ${PWD}/rootfs /bin/bash -c "apt install -y gdb strace"; \
 		mkdir shares; \
+		\
+		#configure shared directory \
 		echo "shares /mnt/shares 9p trans=virtio 0 0" | sudo tee -a ${PWD}/rootfs/etc/fstab; \
-		echo "echo -e \"The shared folder for host side is at \033[0;31m${PWD}/shares\033[0m\"" | sudo tee -a ${PWD}/rootfs/root/.bashrc; \
-		echo "echo -e \"The shared folder for guest side is at \033[0;31m/mnt/shares\033[0m\"" | sudo tee -a ${PWD}/rootfs/root/.bashrc; \
+		\
+		#configure debug hint \
+		echo "\033[0m\033[1;37mWhen debugging the driver, execute \033[31mlx-symbols in gdb\033[37m before running insmod to set breakpoints using the driver's function name\033[0m" | sudo tee -a ${PWD}/rootfs/etc/issue; \
+		echo "" | sudo tee -a ${PWD}/rootfs/etc/issue; \
+		\
+		#configure welcome message \
+		echo "" | sudo tee -a ${PWD}/rootfs/etc/motd; \
+		echo "\033[0m\033[1;37mThe shared folder for host side is at \033[31m${PWD}/shares\033[0m" | sudo tee -a ${PWD}/rootfs/etc/motd; \
+		echo "\033[0m\033[1;37mThe shared folder for guest side is at \033[31m/mnt/shares\033[0m" | sudo tee -a ${PWD}/rootfs/etc/motd; \
+		echo "" | sudo tee -a ${PWD}/rootfs/etc/motd; \
+		\
+		#configure password \
 		sudo chroot ${PWD}/rootfs /bin/bash -c "passwd -d root"; \
 	fi
 	cd ${PWD}/rootfs; sudo find . | sudo cpio -o --format=newc -F ${PWD}/rootfs.cpio >/dev/null
