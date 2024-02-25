@@ -1,5 +1,6 @@
 PWD                                     := $(shell pwd)
 NPROC                                   := $(shell nproc)
+PORT                                    := 1234
 
 MEM                                     := 2G
 SMP                                     := 2
@@ -15,7 +16,7 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -nographic
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-shutdown -no-reboot
 
-.PHONY: driver env kernel rootfs run srcs tool
+.PHONY: debug driver env kernel rootfs run srcs tool
 
 tool:
 	bear --append --output ${PWD}/compile_commands.json -- \
@@ -70,3 +71,9 @@ env: kernel rootfs srcs
 run:
 	${QEMU} \
 		${QEMU_OPTIONS}
+
+debug:
+	gnome-terminal -- gdb ${PWD}/kernel/vmlinux --init-eval-command="set confirm on" --init-eval-command="add-auto-load-safe-path ${PWD}/kernel/scripts/gdb/vmlinux-gdb.py" --eval-command="target remote localhost:${PORT}"
+	${QEMU} \
+		${QEMU_OPTIONS} \
+		-S -gdb tcp::${PORT}
