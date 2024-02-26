@@ -51,3 +51,4 @@ yaf_sb_info    superblock
 2. [Toy-VFS](https://github.com/gishsteven/Toy-VFS)
 3. [sysprog21/simplefs](https://github.com/sysprog21/simplefs)
 4. [OSTEP](https://pages.cs.wisc.edu/~remzi/OSTEP/Chinese/40.pdf)
+5. [Linux内核—文件系统mount过程](https://zhuanlan.zhihu.com/p/606596107)
