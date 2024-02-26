@@ -109,6 +109,14 @@ out:
 
 static void yaf_exit(void)
 {
+    int ret = 0;
+
+    ret = unregister_filesystem(&yaf_file_system_type);
+    if (ret) {
+        log(LOG_ERR "yaf: "
+            "unregistering filesystem failed with error code %d", ret);
+    }
+
     log(LOG_INFO "yaf: cleanup filesystem");
 }
 
