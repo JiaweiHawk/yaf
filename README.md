@@ -40,7 +40,7 @@ yaf_sb_info    superblock
 │nr_d  ◄───────►nr_d  │number of data blocks           │
 └──────┘       ┌──────┼────────────────────────────────┤◄──16 bytes
                │      │                                │
-               │magic │fill with the magic string 'yaf'│
+               │magic │fill with the magic string "yaf"│
                │      │                                │
                └──────┴────────────────────────────────┘
 ```
