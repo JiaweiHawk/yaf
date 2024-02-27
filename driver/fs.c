@@ -10,9 +10,6 @@ MODULE_AUTHOR("Hawkins Jiawei");
  * mount the yaf filesystem onto a directory, as detailed in
  * https://docs.kernel.org/next/filesystems/vfs.html#registering-and-mounting-a-filesystem.
  *
- * The overall process of mounting is outlined in the documentation
- * available at https://docs.kernel.org/filesystems/mount_api.html#overview.
- *
  * In essence, yaf_mount() is responsible for parsing the provided
  * block device containing the yaf filesystem image, creating
  * and initializing an in-memory superblock, represented by
