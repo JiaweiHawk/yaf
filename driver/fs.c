@@ -71,13 +71,12 @@ static struct dentry* yaf_mount(struct file_system_type *fs_type,
 
     ret = mount_bdev(fs_type, flags, dev_name, data, yaf_fill_super);
     if (IS_ERR(ret)) {
-        log(LOG_ERR "yaf: "
-            "mount block device failed with error code %ld",
-            PTR_ERR(ret));
+        log(LOG_ERR,
+            "mount_bdev() failed with error code %ld", PTR_ERR(ret));
         goto out;
     }
 
-    log(LOG_INFO "yaf: mount block device");
+    log(LOG_INFO, "mount block device");
 
 out:
     return ret;
@@ -107,12 +106,12 @@ static int yaf_init(void)
 
     ret = register_filesystem(&yaf_file_system_type);
     if (ret) {
-        log(LOG_ERR "yaf: "
-            "registering filesystem failed with error code %d", ret);
+        log(LOG_ERR,
+            "register_filesystem() failed with error code %d", ret);
         goto out;
     }
 
-    log(LOG_INFO "yaf: initialize filesystem");
+    log(LOG_INFO, "initialize filesystem");
 
 out:
     return ret;
@@ -124,11 +123,11 @@ static void yaf_exit(void)
 
     ret = unregister_filesystem(&yaf_file_system_type);
     if (ret) {
-        log(LOG_ERR "yaf: "
-            "unregistering filesystem failed with error code %d", ret);
+        log(LOG_ERR,
+            "unregister_filesystem failed with error code %d", ret);
     }
 
-    log(LOG_INFO "yaf: cleanup filesystem");
+    log(LOG_INFO, "cleanup filesystem");
 }
 
 module_init(yaf_init);

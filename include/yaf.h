@@ -9,13 +9,17 @@
     #ifdef __KERNEL__
         #include <linux/printk.h>
         #include <linux/kern_levels.h>
-        #define log(args...) do { \
-            printk(KERN_DEFAULT args); \
+        #define log(level, args...) do { \
+            printk(KERN_DEFAULT level); \
+            printk(KERN_CONT "[yaf(%s:%d)]: ", __FILE__, __LINE__); \
+            printk(KERN_CONT args); \
             printk(KERN_CONT LOG_NONE "\n"); \
         } while(0)
     #else // __KERNEL__
         #include <stdio.h>
-        #define log(args...) do { \
+        #define log(level, args...) do { \
+            printf(level); \
+            printf("[mkfs(%s:%d)]: ", __FILE__, __LINE__); \
             printf(args); \
             printf(LOG_NONE "\n"); \
         } while(0)
