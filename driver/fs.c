@@ -1,5 +1,6 @@
 #include <linux/module.h>
 #include "../include/yaf.h"
+#include "super.h"
 
 /* information for module */
 MODULE_LICENSE("GPL");
@@ -66,7 +67,20 @@ static struct dentry* yaf_mount(struct file_system_type *fs_type,
                                 int flags, const char *dev_name,
                                 void *data)
 {
-    return ERR_PTR(-ENOSYS);
+    struct dentry *ret;
+
+    ret = mount_bdev(fs_type, flags, dev_name, data, yaf_fill_super);
+    if (IS_ERR(ret)) {
+        log(LOG_ERR "yaf: "
+            "mount block device failed with error code %ld",
+            PTR_ERR(ret));
+        goto out;
+    }
+
+    log(LOG_INFO "yaf: mount block device");
+
+out:
+    return ret;
 }
 
 /*

@@ -11,6 +11,8 @@
 driver/*
 !driver/Makefile
 !driver/fs.c
+!driver/super.c
+!driver/super.h
 
 # pattern for files in tool directory
 !tool
