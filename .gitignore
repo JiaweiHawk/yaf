@@ -9,8 +9,10 @@
 # pattern for files in driver directory
 !driver
 driver/*
-!driver/Makefile
 !driver/fs.c
+!driver/inode.c
+!driver/inode.h
+!driver/Makefile
 !driver/super.c
 !driver/super.h
 
