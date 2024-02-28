@@ -29,7 +29,7 @@ BID_SB_MIN BID_IBP_MIN  BID_DBP_MIN   BID_I_MIN    BID_D_MIN    BID_MAX
 The superblock contains the metadata for the partition as below:
 
 ```
-yaf_sb_info    superblock
+yaf_sb_info               on-disk superblock
 ┌──────┐       ┌──────┬────────────────────────────────┐◄──0  bytes
 │nr_ibp◄───────►nr_ibp│number of inode bitmap blocks   │
 ├──────┐       ┌──────┼────────────────────────────────┤◄──4  bytes
