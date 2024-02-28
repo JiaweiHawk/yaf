@@ -25,6 +25,27 @@
         } while(0)
     #endif // __KERNEL__
 
+    /* use assert for both kernel and user */
+    #ifdef __KERNEL__
+        #include <linux/panic.h>
+        #define assert(condition) do { \
+            if (!(condition)) { \
+                panic(LOG_ERR "[yaf(%s:%d)]: '%s' assertion failed\n", \
+                      __FILE__, __LINE__, #condition); \
+            } \
+        } while(0)
+    #else // __KERNEL__
+        #include <stdio.h>
+        #include <stdlib.h>
+        #include <errno.h>
+        #define assert(condition) do { \
+            if (!(condition)) { \
+                log(LOG_ERR, "'%s' assertion failed", #condition); \
+                exit(-EINVAL); \
+            } \
+        } while(0)
+    #endif // __KERNEL__
+
     /*
      * partition layout
      *
