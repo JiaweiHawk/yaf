@@ -19,6 +19,8 @@ driver/*
 # pattern for files in tool directory
 !tool
 tool/*
+!tool/arguments.c
+!tool/arguments.h
 !tool/mkfs.c
 
 # pattern for files in include directory
