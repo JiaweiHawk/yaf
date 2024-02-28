@@ -55,6 +55,9 @@ int yaf_fill_super(struct super_block *sb, void *data, int silent)
     ysi->nr_i = ysb->yaf_sb_info.nr_i;
     ysi->nr_d = ysb->yaf_sb_info.nr_d;
 
+    /* attach yaf private data to *struct super_block* */
+    sb->s_fs_info = ysi;
+
     /* get inode fro root dentry from block device */
     root = yaf_iget(sb, 0);
     if (IS_ERR(root)) {
