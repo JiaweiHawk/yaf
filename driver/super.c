@@ -72,8 +72,7 @@ int yaf_fill_super(struct super_block *sb, void *data, int silent)
         goto iput_root;
     }
 
-    brelse(bh);
-    return 0;
+    goto release_bh;
 
 iput_root:
     iput(root);

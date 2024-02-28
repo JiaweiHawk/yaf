@@ -11,6 +11,7 @@ static struct argp_option options[] = {
 static error_t parse_opt(int key, char *arg,
                          struct argp_state *state) {
     Arguments *arguments = state->input;
+    long ret = 0;
 
     switch (key) {
         case ARGP_KEY_ARG:
@@ -24,10 +25,11 @@ static error_t parse_opt(int key, char *arg,
             break;
 
         default:
-            return ARGP_ERR_UNKNOWN;
+            ret = ARGP_ERR_UNKNOWN;
+            break;
     }
 
-    return 0;
+    return ret;
 }
 
 static struct argp argp = {
