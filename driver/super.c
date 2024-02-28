@@ -2,8 +2,8 @@
 #include <linux/gfp_types.h>
 #include <linux/slab.h>
 #include "../include/yaf.h"
-#include "super.h"
-#include "inode.h"
+#include "../include/super.h"
+#include "../include/inode.h"
 
 /*
  * yaf_fill_super() is responsible for parsing the provided

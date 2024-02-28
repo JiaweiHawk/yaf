@@ -1,6 +1,6 @@
 #include <linux/module.h>
 #include "../include/yaf.h"
-#include "super.h"
+#include "../include/super.h"
 
 /* information for module */
 MODULE_LICENSE("GPL");

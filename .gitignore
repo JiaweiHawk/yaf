@@ -11,10 +11,8 @@
 driver/*
 !driver/fs.c
 !driver/inode.c
-!driver/inode.h
 !driver/Makefile
 !driver/super.c
-!driver/super.h
 
 # pattern for files in tool directory
 !tool
@@ -26,4 +24,6 @@ tool/*
 # pattern for files in include directory
 !include
 include/*
+!include/inode.h
+!include/super.h
 !include/yaf.h
