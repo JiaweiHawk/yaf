@@ -4,6 +4,7 @@
 #include "../include/yaf.h"
 #include "../include/super.h"
 #include "../include/inode.h"
+#include "../include/fs.h"
 
 /*
  * yaf_fill_super() is responsible for parsing the provided
