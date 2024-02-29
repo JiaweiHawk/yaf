@@ -1,4 +1,5 @@
 #include <linux/buffer_head.h>
+#include <linux/byteorder/generic.h>
 #include <linux/gfp_types.h>
 #include <linux/slab.h>
 #include "../include/yaf.h"
@@ -51,10 +52,10 @@ int yaf_fill_super(struct super_block *sb, void *data, int silent)
     }
 
     /* initialize *Yaf_Sb_Info* */
-    ysi->nr_ibp = ysb->yaf_sb_info.nr_ibp;
-    ysi->nr_dbp = ysb->yaf_sb_info.nr_dbp;
-    ysi->nr_i = ysb->yaf_sb_info.nr_i;
-    ysi->nr_d = ysb->yaf_sb_info.nr_d;
+    ysi->nr_ibp = le32_to_cpu(ysb->yaf_sb_info.nr_ibp);
+    ysi->nr_dbp = le32_to_cpu(ysb->yaf_sb_info.nr_dbp);
+    ysi->nr_i = le32_to_cpu(ysb->yaf_sb_info.nr_i);
+    ysi->nr_d = le32_to_cpu(ysb->yaf_sb_info.nr_d);
 
     /* attach yaf private data to *struct super_block* */
     sb->s_fs_info = ysi;
