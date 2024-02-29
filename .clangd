@@ -1,0 +1,7 @@
+CompileFlags:
+    Add: -ferror-limit=0 # avoid halting parsing of indexes due to errors
+    Remove: [-mpreferred-stack-boundary*, -mindirect-branch*, -fno-allow-store-data-races, -fconserve-stack] # remove gcc flags unrecognized by clang
+
+Diagnostics:
+    ClangTidy:
+        Remove: bugprone-sizeof-expression # remove false-positive warnings

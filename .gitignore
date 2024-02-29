@@ -2,6 +2,7 @@
 *
 
 # pattern for files in root directory
+!.clangd
 !Makefile
 !README.md
 !LICENSE
