@@ -43,6 +43,7 @@
         uint32_t nr_d;   /*number of data blocks*/
     } Yaf_Sb_Info;
 
+    /* on-disk superblock structure */
     typedef struct YAF_SUPERBLOCK {
         Yaf_Sb_Info yaf_sb_info;
         char magic[YAF_BLOCK_SIZE - sizeof(Yaf_Sb_Info)];
