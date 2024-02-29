@@ -45,7 +45,9 @@
 
     #define YAF_SB(sb)  ((Yaf_Sb_Info *)(sb->s_fs_info))
 
-    #ifndef __KERNEL__
+    #ifdef __KERNEL__
+        #include "yaf.h"
+    #else // __KERNEL__
         #include <assert.h>
     #endif // __KERNEL__
     static_assert(sizeof(Yaf_Superblock) == YAF_BLOCK_SIZE);

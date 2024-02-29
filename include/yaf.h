@@ -35,15 +35,7 @@
             } \
         } while(0)
     #else // __KERNEL__
-        #include <stdio.h>
-        #include <stdlib.h>
-        #include <errno.h>
-        #define assert(condition) do { \
-            if (!(condition)) { \
-                log(LOG_ERR, "'%s' assertion failed", #condition); \
-                exit(-EINVAL); \
-            } \
-        } while(0)
+        #include <assert.h>
     #endif // __KERNEL__
 
 #endif // __YAF_H_
