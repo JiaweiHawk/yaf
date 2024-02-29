@@ -2,12 +2,6 @@
 
     #define __SUPER_H_
 
-    #ifdef __KERNEL__
-        #include <linux/fs.h>
-        /* fill the in-memory superblock according to on-disk superblock */
-        int yaf_fill_super(struct super_block *sb, void *data, int flags);
-    #endif // __KERNEL__
-
     #define KiB * (1024)
     #define YAF_BLOCK_SIZE (4 KiB)
 
@@ -53,5 +47,17 @@
         #include <assert.h>
     #endif // __KERNEL__
     static_assert(sizeof(Yaf_Superblock) == YAF_BLOCK_SIZE);
+
+    #ifdef __KERNEL__
+        #include <linux/fs.h>
+        /* fill the in-memory superblock according to on-disk superblock */
+        int yaf_fill_super(struct super_block *sb, void *data, int flags);
+
+        /* initialize the *Yaf_Sb_Info* cache */
+        long yaf_init_inode_cache(void);
+
+        /* finalize the *Yaf_Sb_Info* cache */
+        void yaf_fini_inode_cache(void);
+    #endif // __KERNEL__
 
 #endif // __SUPER_H_

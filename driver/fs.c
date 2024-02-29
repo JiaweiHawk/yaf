@@ -104,15 +104,25 @@ static int yaf_init(void)
 {
     int ret = 0;
 
+    ret = yaf_init_inode_cache();
+    if (ret) {
+        log(LOG_ERR,
+            "yaf_init_inode_cache() failed with error code %d", ret);
+        goto out;
+    }
+
     ret = register_filesystem(&yaf_file_system_type);
     if (ret) {
         log(LOG_ERR,
             "register_filesystem() failed with error code %d", ret);
-        goto out;
+        goto fini_inode_cache;
     }
 
     log(LOG_INFO, "initialize filesystem");
+    goto out;
 
+fini_inode_cache:
+    yaf_fini_inode_cache();
 out:
     return ret;
 }
@@ -125,7 +135,10 @@ static void yaf_exit(void)
     if (ret) {
         log(LOG_ERR,
             "unregister_filesystem failed with error code %d", ret);
+        return;
     }
+
+    yaf_fini_inode_cache();
 
     log(LOG_INFO, "cleanup filesystem");
 }

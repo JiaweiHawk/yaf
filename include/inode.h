@@ -131,4 +131,7 @@
         struct inode *yaf_iget(struct super_block *sb, unsigned long ino);
     #endif // __KERNEL__
 
+    #define YAF_INODE(inode) \
+        ((Yaf_Inode_Info *)container_of(inode, Yaf_Inode_Info, vfs_inode))
+
 #endif // __INODE_H_
