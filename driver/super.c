@@ -178,3 +178,8 @@ release_bh:
 out:
     return ret;
 }
+
+void yaf_kill_sb(struct super_block *sb)
+{
+    kill_block_super(sb);
+}

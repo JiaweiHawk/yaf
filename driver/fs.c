@@ -92,6 +92,9 @@ static struct file_system_type yaf_file_system_type = {
     .mount = yaf_mount, // the method to call when a new instance of
                         // the filesystem shoud be mounted
 
+    .kill_sb = yaf_kill_sb, // the method to call when an instance of
+                         // this filesystem should be shut down
+
     .owner = THIS_MODULE, // is used to manage the modules' reference
                           // count, preventing unloading of the module
                           // while the filesystem code is in use according

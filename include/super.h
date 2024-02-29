@@ -57,6 +57,8 @@
         /* fill the in-memory superblock according to on-disk superblock */
         int yaf_fill_super(struct super_block *sb, void *data, int flags);
 
+        void yaf_kill_sb(struct super_block *sb);
+
         /* initialize the *Yaf_Sb_Info* cache */
         long yaf_init_inode_cache(void);
 
