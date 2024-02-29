@@ -151,7 +151,7 @@ int yaf_fill_super(struct super_block *sb, void *data, int silent)
     sb->s_fs_info = ysi;
 
     /* get inode for root dentry from block device */
-    root = yaf_iget(sb, 0);
+    root = yaf_iget(sb, ROOT_INO);
     if (IS_ERR(root)) {
         ret = PTR_ERR(root);
         log(LOG_ERR,

@@ -43,6 +43,8 @@
         char magic[YAF_BLOCK_SIZE - sizeof(Yaf_Sb_Info)];
     } Yaf_Superblock;
 
+    #define YAF_SB(sb)  ((Yaf_Sb_Info *)(sb->s_fs_info))
+
     #ifndef __KERNEL__
         #include <assert.h>
     #endif // __KERNEL__

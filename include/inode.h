@@ -125,9 +125,24 @@
     #include "super.h"
     static_assert(YAF_BLOCK_SIZE % sizeof(Yaf_Inode) == 0);
 
+    /* inode number for the root inode of yaf */
+    #define ROOT_INO    0
+
+    /* number of inodes per block */
+    #define INODES_PER_BLOCK    (YAF_BLOCK_SIZE / sizeof(Yaf_Inode))
+
+    /* convert inode number to the corresponding block id */
+    #include "fs.h"
+    #define INO2BID(sb, ino)    (BID_I_MIN((sb)) + \
+                                 ((ino)) / YAF_BLOCK_SIZE)
+
+    #define YAF_INODE(inode) \
+        ((Yaf_Inode_Info *)container_of(inode, Yaf_Inode_Info, vfs_inode))
+
     #ifdef __KERNEL__
         #include <linux/fs.h>
         #include <linux/types.h>
+        /* fill the in-memory inode according to on-disk inode */
         struct inode *yaf_iget(struct super_block *sb, unsigned long ino);
     #endif // __KERNEL__
 
