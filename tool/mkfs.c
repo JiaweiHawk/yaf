@@ -148,8 +148,34 @@ out:
 
 /* fill the disk data bitmap section with relevant data */
 static long write_data_bitmap(int bfd, Yaf_Superblock *ysb) {
-    // TODO: unimplemented
-    return 0;
+    long ret = 0;
+
+    /* zero the data bitmap section */
+    for (int i = 0; i < le32toh(ysb->yaf_sb_info.nr_dbp); ++i) {
+        char bytes[YAF_BLOCK_SIZE] = {};
+
+        ret = lseek(bfd, (BID_DBP_MIN(ysb) + i) * YAF_BLOCK_SIZE,
+                    SEEK_SET);
+        if (ret == -1) {
+            ret = errno;
+            log(LOG_ERR, "lseek() failed with error %s", strerror(errno));
+            goto out;
+        }
+        ret = write(bfd, &bytes, sizeof(bytes));
+        if (ret != sizeof(bytes)) {
+            ret = -EIO;
+            log(LOG_INFO, "write() failed");
+            goto out;
+        }
+        log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld "
+            "for the data bitmap", sizeof(bytes),
+            (BID_DBP_MIN(ysb) + i) * YAF_BLOCK_SIZE);
+    }
+
+    ret = 0;
+
+out:
+    return ret;
 }
 
 /* fill the disk inode blocks section with relevant data */
