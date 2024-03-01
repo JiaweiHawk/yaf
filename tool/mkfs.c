@@ -57,10 +57,40 @@ static long write_superblock(int bfd, Yaf_Superblock *ysb, long bnr) {
         goto out;
     }
 
+    /* restore *Yaf_Superblock* to host endian */
+    ysb->yaf_sb_info.nr_ibp = le32toh(ysb->yaf_sb_info.nr_ibp);
+    ysb->yaf_sb_info.nr_dbp = le32toh(ysb->yaf_sb_info.nr_dbp);
+    ysb->yaf_sb_info.nr_i = le32toh(ysb->yaf_sb_info.nr_i);
+    ysb->yaf_sb_info.nr_d = le32toh(ysb->yaf_sb_info.nr_d);
+
     ret = 0;
 
 out:
     return ret;
+}
+
+/* fill the disk inode bitmap section with relevant data */
+static long write_inode_bitmap(int bfd, Yaf_Superblock *ysb) {
+    // TODO: unimplemented
+    return 0;
+}
+
+/* fill the disk data bitmap section with relevant data */
+static long write_data_bitmap(int bfd, Yaf_Superblock *ysb) {
+    // TODO: unimplemented
+    return 0;
+}
+
+/* fill the disk inode blocks section with relevant data */
+static long write_inode_blocks(int bfd, Yaf_Superblock *ysb) {
+    // TODO: unimplemented
+    return 0;
+}
+
+/* fill the disk data blocks section with relevant data */
+static long write_data_blocks(int bfd, Yaf_Superblock *ysb) {
+    // TODO: unimplemented
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -113,6 +143,42 @@ int main(int argc, char *argv[])
         ret = errno;
         log(LOG_ERR,
             "write_superblock() failed with error %s", strerror(errno));
+        goto close_bfd;
+    }
+
+    /* write down the inode bitmap data */
+    ret = write_inode_bitmap(bfd, &ysb);
+    if (ret) {
+        ret = errno;
+        log(LOG_ERR,
+            "write_inode_bitmap() failed with error %s", strerror(errno));
+        goto close_bfd;
+    }
+
+    /* write down the data bitmap data */
+    ret = write_data_bitmap(bfd, &ysb);
+    if (ret) {
+        ret = errno;
+        log(LOG_ERR,
+            "write_data_bitmap() failed with error %s", strerror(errno));
+        goto close_bfd;
+    }
+
+    /* write down the inode blocks data */
+    ret = write_inode_blocks(bfd, &ysb);
+    if (ret) {
+        ret = errno;
+        log(LOG_ERR,
+            "write_inode_blocks() failed with error %s", strerror(errno));
+        goto close_bfd;
+    }
+
+    /* write down the data blocks data */
+    ret = write_data_blocks(bfd, &ysb);
+    if (ret) {
+        ret = errno;
+        log(LOG_ERR,
+            "write_data_blocks() failed with error %s", strerror(errno));
         goto close_bfd;
     }
 
