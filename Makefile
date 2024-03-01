@@ -18,6 +18,9 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-shutdown -no-rebo
 
 .PHONY: debug driver env kernel rootfs run srcs tool
 
+srcs: driver tool
+	@echo -e '\033[0;32m[*]\033[0mbuild the yaf sources'
+
 tool:
 	bear --append --output ${PWD}/compile_commands.json -- \
 		gcc -g -Wall -Werror -o ${PWD}/tool/mkfs ${PWD}/tool/mkfs.c ${PWD}/tool/arguments.c
@@ -29,9 +32,6 @@ driver:
 		make -C ${PWD}/driver KDIR=${PWD}/kernel -j ${NPROC}
 	cp ${PWD}/driver/yaf.ko ${PWD}/shares
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf kernel module'
-
-srcs: driver tool
-	@echo -e '\033[0;32m[*]\033[0mbuild the yaf sources'
 
 kernel:
 	if [ ! -d ${PWD}/kernel ]; then \
