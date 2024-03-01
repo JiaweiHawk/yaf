@@ -240,7 +240,10 @@ out:
 
 /* fill the disk data blocks section with relevant data */
 static long write_data_blocks(int bfd, Yaf_Superblock *ysb) {
-    // TODO: unimplemented
+    /*
+     * Since the VFS manages "." and ".." dentrys,
+     * the root inode currently requires no data.
+     */
     return 0;
 }
 
