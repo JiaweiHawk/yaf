@@ -20,7 +20,7 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-shutdown -no-rebo
 
 tool:
 	bear --append --output ${PWD}/compile_commands.json -- \
-		gcc -g -Wall -o ${PWD}/tool/mkfs ${PWD}/tool/mkfs.c ${PWD}/tool/arguments.c
+		gcc -g -Wall -Werror -o ${PWD}/tool/mkfs ${PWD}/tool/mkfs.c ${PWD}/tool/arguments.c
 	cp ${PWD}/tool/mkfs ${PWD}/shares
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf tool'
 
