@@ -14,112 +14,110 @@
      * BID_SB_MIN BID_IBP_MIN  BID_DBP_MIN   BID_I_MIN    BID_D_MIN    BID_MAX
      */
     #include "super.h"
-    /* minimum block id */
-    static inline unsigned long yaf_bid_min(Yaf_Sb_Info *ysi) {
-        return 0;
-    }
-
-    /* minimum block id for the superblock section */
-    static inline unsigned long yaf_bid_sb_min(Yaf_Sb_Info *ysi) {
-        return yaf_bid_min(ysi);
-    }
-    /* maximum block id for the superblock section */
-    static inline unsigned long yaf_bid_sb_max(Yaf_Sb_Info *ysi) {
-        return yaf_bid_sb_min(ysi) + 1 - 1;
-    }
-
-    /* minimum block id for the inode bitmap section */
-    static inline unsigned long yaf_bid_ibp_min(Yaf_Sb_Info *ysi) {
-        return yaf_bid_sb_max(ysi) + 1;
-    }
-    /* maximum block id for the inode bitmap section */
-    static inline unsigned long yaf_bid_ibp_max(Yaf_Sb_Info *ysi) {
-        return yaf_bid_ibp_min(ysi) + ysi->nr_ibp - 1;
-    }
-
-    /* minimum block id for the data bitmap section */
-    static inline unsigned long yaf_bid_dbp_min(Yaf_Sb_Info *ysi) {
-        return yaf_bid_ibp_max(ysi) + 1;
-    }
-    /* maximum block id for the data bitmap section */
-    static inline unsigned long yaf_bid_dbp_max(Yaf_Sb_Info *ysi) {
-        return yaf_bid_dbp_min(ysi) + ysi->nr_dbp - 1;
-    }
-
-    /* minimum block id for the inode blocks section */
-    static inline unsigned long yaf_bid_i_min(Yaf_Sb_Info *ysi) {
-        return yaf_bid_dbp_max(ysi) + 1;
-    }
-    /* maximum block id for the inode blocks section */
-    static inline unsigned long yaf_bid_i_max(Yaf_Sb_Info *ysi) {
-        return yaf_bid_i_min(ysi) + ysi->nr_i - 1;
-    }
 
     #ifdef __KERNEL__
         #include <linux/fs.h>
 
+        /* minimum block id */
         static inline unsigned long BID_MIN(struct super_block *sb) {
-            return yaf_bid_min(YAF_SB(sb));
+            return 0;
         }
 
+        /* minimum block id for the superblock section */
         static inline unsigned long BID_SB_MIN(struct super_block *sb) {
-            return yaf_bid_sb_min(YAF_SB(sb));
+            return BID_MIN(sb);
         }
+        /* maximum block id for the superblock section */
         static inline unsigned long BID_SB_MAX(struct super_block *sb) {
-            return yaf_bid_sb_max(YAF_SB(sb));
+            return BID_SB_MIN(sb) + 1 - 1;
         }
 
+        /* minimum block id for the inode bitmap section */
         static inline unsigned long BID_IBP_MIN(struct super_block *sb) {
-            return yaf_bid_ibp_min(YAF_SB(sb));
+            return BID_SB_MAX(sb) + 1;
         }
+        /* maximum block id for the inode bitmap section */
         static inline unsigned long BID_IBP_MAX(struct super_block *sb) {
-            return yaf_bid_ibp_max(YAF_SB(sb));
+            return BID_IBP_MIN(sb) + YAF_SB(sb)->nr_ibp - 1;
         }
 
+        /* minimum block id for the data bitmap section */
         static inline unsigned long BID_DBP_MIN(struct super_block *sb) {
-            return yaf_bid_dbp_min(YAF_SB(sb));
+            return BID_IBP_MAX(sb) + 1;
         }
+        /* maximum block id for the data bitmap section */
         static inline unsigned long BID_DBP_MAX(struct super_block *sb) {
-            return yaf_bid_dbp_max(YAF_SB(sb));
+            return BID_DBP_MIN(sb) + YAF_SB(sb)->nr_dbp - 1;
         }
 
+        /* minimum block id for the inode blocks section */
         static inline unsigned long BID_I_MIN(struct super_block *sb) {
-            return yaf_bid_i_min(YAF_SB(sb));
+            return BID_DBP_MAX(sb) + 1;
         }
+        /* maximum block id for the inode blocks section */
         static inline unsigned long BID_I_MAX(struct super_block *sb) {
-            return yaf_bid_i_max(YAF_SB(sb));
+            return BID_I_MIN(sb) + YAF_SB(sb)->nr_i - 1;
+        }
+
+        /* minimum block id for the data blocks section */
+        static inline unsigned long BID_D_MIN(struct super_block *sb) {
+            return BID_I_MAX(sb) + 1;
+        }
+        /* maximum block id for the data blocks section */
+        static inline unsigned long BID_D_MAX(struct super_block *sb) {
+            return BID_D_MIN(sb) + YAF_SB(sb)->nr_d - 1;
         }
     #else // __KERNEL__
+        #include <endian.h>
+
+        /* minimum block id */
         static inline unsigned long BID_MIN(Yaf_Superblock *ysb) {
-            return yaf_bid_min(&ysb->yaf_sb_info);
+            return 0;
         }
 
+        /* minimum block id for the superblock section */
         static inline unsigned long BID_SB_MIN(Yaf_Superblock *ysb) {
-            return yaf_bid_sb_min(&ysb->yaf_sb_info);
+            return BID_MIN(ysb);
         }
+        /* maximum block id for the superblock section */
         static inline unsigned long BID_SB_MAX(Yaf_Superblock *ysb) {
-            return yaf_bid_sb_max(&ysb->yaf_sb_info);
+            return BID_SB_MIN(ysb) + 1 - 1;
         }
 
+        /* minimum block id for the inode bitmap section */
         static inline unsigned long BID_IBP_MIN(Yaf_Superblock *ysb) {
-            return yaf_bid_ibp_min(&ysb->yaf_sb_info);
+            return BID_SB_MAX(ysb) + 1;
         }
+        /* maximum block id for the inode bitmap section */
         static inline unsigned long BID_IBP_MAX(Yaf_Superblock *ysb) {
-            return yaf_bid_ibp_max(&ysb->yaf_sb_info);
+            return BID_IBP_MIN(ysb) + le32toh(ysb->yaf_sb_info.nr_ibp) - 1;
         }
 
+        /* minimum block id for the data bitmap section */
         static inline unsigned long BID_DBP_MIN(Yaf_Superblock *ysb) {
-            return yaf_bid_dbp_min(&ysb->yaf_sb_info);
+            return BID_IBP_MAX(ysb) + 1;
         }
+        /* maximum block id for the data bitmap section */
         static inline unsigned long BID_DBP_MAX(Yaf_Superblock *ysb) {
-            return yaf_bid_dbp_max(&ysb->yaf_sb_info);
+            return BID_DBP_MIN(ysb) + le32toh(ysb->yaf_sb_info.nr_dbp) - 1;
         }
 
+        /* minimum block id for the inode blocks section */
         static inline unsigned long BID_I_MIN(Yaf_Superblock *ysb) {
-            return yaf_bid_i_min(&ysb->yaf_sb_info);
+            return BID_DBP_MAX(ysb) + 1;
         }
+        /* maximum block id for the inode blocks section */
         static inline unsigned long BID_I_MAX(Yaf_Superblock *ysb) {
-            return yaf_bid_i_max(&ysb->yaf_sb_info);
+            return BID_I_MIN(ysb) + le32toh(ysb->yaf_sb_info.nr_i) - 1;
+        }
+
+        /* minimum block id for the data blocks section */
+        static inline unsigned long BID_D_MIN(Yaf_Superblock *ysb) {
+            return BID_I_MAX(ysb) + 1;
+        }
+        /* maximum block id for the data blocks section */
+        static inline unsigned long BID_D_MAX(Yaf_Superblock *ysb) {
+            return BID_D_MIN(ysb) + le32toh(ysb->yaf_sb_info.nr_d) - 1;
         }
     #endif // __KERNEL__
 
