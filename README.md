@@ -45,6 +45,29 @@ yaf_sb_info               on-disk superblock
                └──────┴────────────────────────────────┘
 ```
 
+## bitmap
+
+Bitmap is used to manage the resource allocation within both the inode blocks and data blocks sections of the disk. Each bit of the bitmap corresponds to the usage status of either an inode or a data block, where *1* denotes occupancy and *0* indicates availability. The structure of the bitmap is shown below:
+
+```
+   least significant bit             most significant bit
+             │                               │
+             │                               ▼
+             ├───┬───┬───┬───┬───┬───┬───┬───┐
+        Byte │   │   │   │   │   │   │   │   │
+             └───┴───┴───┴───┴───┴───┴───┴───┘
+             ▲                               ▲
+             │                               │
+             │       ┌───────────────────────┘
+             │       │
+             ├───────┼───────┬───────┬───────┬───────┐
+             │ Byte0 │ Byte1 │ Byte2 │ ..... │ Byten │
+             └───────┴───────┴───────┴───────┴───────┘
+
+──────────────────────────────────────────────────────────────────►
+                            bitmap idx growth direction
+```
+
 ## inode
 
 Inodes are filesystem objects such as regular files, directories, FIFOs and other beasts.
