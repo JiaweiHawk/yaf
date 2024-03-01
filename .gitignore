@@ -25,6 +25,7 @@ tool/*
 # pattern for files in include directory
 !include
 include/*
+!include/bitmap.h
 !include/fs.h
 !include/inode.h
 !include/super.h

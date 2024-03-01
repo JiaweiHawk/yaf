@@ -10,6 +10,7 @@
 #include "../include/inode.h"
 #include "../include/super.h"
 #include "../include/yaf.h"
+#include "../include/bitmap.h"
 #include "arguments.h"
 
 static inline uint32_t align_down(uint32_t x, uint32_t a) {
@@ -22,16 +23,16 @@ static inline uint32_t idiv_ceil(uint32_t a, uint32_t b) {
 
 /* fill the on-disk superblock with relevant data */
 static long write_superblock(int bfd, Yaf_Superblock *ysb, long bnr) {
-    long ret = 0;
+    long ret;
     uint32_t nr_i, nr_d, nr_ibp, nr_dbp;
 
     /* initialize the *Yaf_Superblock* */
     bnr = align_down(bnr, INODES_PER_BLOCK);
-    nr_ibp = idiv_ceil(bnr, YAF_BLOCK_SIZE * 8);
+    nr_ibp = idiv_ceil(bnr, YAF_BLOCK_SIZE * BITS_PER_BYTE);
     ysb->yaf_sb_info.nr_ibp = htole32(nr_ibp);
     log(LOG_INFO, "inode bitmap section has %d block(s)", nr_ibp);
 
-    nr_dbp = idiv_ceil(bnr, YAF_BLOCK_SIZE * 8);
+    nr_dbp = idiv_ceil(bnr, YAF_BLOCK_SIZE * BITS_PER_BYTE);
     ysb->yaf_sb_info.nr_dbp = htole32(nr_dbp);
     log(LOG_INFO, "data bitmap section has %d block(s)", nr_dbp);
 
@@ -50,12 +51,21 @@ static long write_superblock(int bfd, Yaf_Superblock *ysb, long bnr) {
     }
 
     /* write down the data */
+    ret = lseek(bfd, BID_SB_MIN(ysb) * YAF_BLOCK_SIZE, SEEK_SET);
+    if (ret == -1) {
+        ret = errno;
+        log(LOG_ERR, "lseek() failed with error %s", strerror(errno));
+        goto out;
+    }
     ret = write(bfd, ysb, sizeof(Yaf_Superblock));
     if (ret != sizeof(Yaf_Superblock)) {
         ret = -EIO;
         log(LOG_INFO, "write() failed");
         goto out;
     }
+    log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld "
+        "for the superblock", sizeof(Yaf_Superblock),
+        BID_SB_MIN(ysb) * YAF_BLOCK_SIZE);
 
     /* restore *Yaf_Superblock* to host endian */
     ysb->yaf_sb_info.nr_ibp = le32toh(ysb->yaf_sb_info.nr_ibp);
@@ -80,10 +90,60 @@ out:
     return ret;
 }
 
+
+/* convert inode bitmap idx to the offset in disk */
+#define IDXI2DOFF(sb, idx)  (IDXI2BID(sb, idx) * YAF_BLOCK_SIZE \
+                             + IDX2BKOFF(idx))
+
 /* fill the disk inode bitmap section with relevant data */
 static long write_inode_bitmap(int bfd, Yaf_Superblock *ysb) {
-    // TODO: unimplemented
-    return 0;
+    long ret = 0;
+    uint8_t byte;
+
+    /* zero the inode bitmap section */
+    for (int i = 0; i < le32toh(ysb->yaf_sb_info.nr_ibp); ++i) {
+        char bytes[YAF_BLOCK_SIZE] = {};
+
+        ret = lseek(bfd, (BID_IBP_MIN(ysb) + i) * YAF_BLOCK_SIZE,
+                    SEEK_SET);
+        if (ret == -1) {
+            ret = errno;
+            log(LOG_ERR, "lseek() failed with error %s", strerror(errno));
+            goto out;
+        }
+        ret = write(bfd, &bytes, sizeof(bytes));
+        if (ret != sizeof(bytes)) {
+            ret = -EIO;
+            log(LOG_INFO, "write() failed");
+            goto out;
+        }
+        log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld "
+            "for the inode bitmap", sizeof(bytes),
+            (BID_IBP_MIN(ysb) + i) * YAF_BLOCK_SIZE);
+    }
+
+    /* mark the root inode */
+    ret = lseek(bfd, IDXI2DOFF(ysb, ROOT_INO), SEEK_SET);
+    if (ret == -1) {
+        ret = errno;
+        log(LOG_ERR, "lseek() failed with error %s", strerror(errno));
+        goto out;
+    }
+    byte = yaf_set_bit(0, IDX2BKOFF(ROOT_INO));
+    ret = write(bfd, &byte, sizeof(byte));
+    if (ret != sizeof(byte)) {
+        ret = -EIO;
+        log(LOG_INFO, "write() failed");
+        goto out;
+    }
+    log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld "
+        "for the root inode in inode bitmap", sizeof(byte),
+        IDXI2DOFF(ysb, ROOT_INO));
+
+    ret = 0;
+
+out:
+    return ret;
 }
 
 /* fill the disk data bitmap section with relevant data */
