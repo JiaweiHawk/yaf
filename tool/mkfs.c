@@ -178,10 +178,64 @@ out:
     return ret;
 }
 
+/* print debugging information of the given inode */
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
+static void debug_inode(uint32_t ino, Yaf_Inode *node) {
+    log(LOG_INFO, "==========debug information begin=============");
+    log(LOG_INFO, "debugging information for inode %d:", ino);
+    log(LOG_INFO, "i_mode = %#o", le32toh(node->i_mode));
+    log(LOG_INFO, "i_uid = %d", le32toh(node->i_uid));
+    log(LOG_INFO, "i_gid = %d", le32toh(node->i_gid));
+    log(LOG_INFO, "i_nlink = %d", le32toh(node->i_nlink));
+    log(LOG_INFO, "i_atime = %d", le32toh(node->i_atime));
+    log(LOG_INFO, "i_mtime = %d", le32toh(node->i_mtime));
+    log(LOG_INFO, "i_ctime = %d", le32toh(node->i_ctime));
+    log(LOG_INFO, "i_size = %d", le32toh(node->i_size));
+    for (int i = 0; i < ARRAY_SIZE(node->i_block); ++i) {
+        log(LOG_INFO, "i_block[%d] = %d", i, le32toh(node->i_block[i]));
+    }
+    log(LOG_INFO, "==========debug information end=============");
+}
+
+/* convert inode number to the offset in disk */
+#define INO2DOFF(sb, ino)   (INO2BID(sb, ino) * YAF_BLOCK_SIZE \
+                             + INO2BOFF(sb, ino))
+
 /* fill the disk inode blocks section with relevant data */
 static long write_inode_blocks(int bfd, Yaf_Superblock *ysb) {
-    // TODO: unimplemented
-    return 0;
+    long ret = 0;
+    Yaf_Inode root;
+
+    /* initialize the root on-disk inode */
+    root.i_mode = htole32(S_IFDIR | ACCESSPERMS);   /*directory, 0777*/
+    root.i_uid = htole32(geteuid());
+    root.i_gid = htole32(getegid());
+    root.i_nlink = htole32(1);
+    root.i_atime = root.i_mtime = root.i_ctime = htole32(0);
+    root.i_size = 0;
+    memset(&root.i_block, 0, sizeof(root.i_block));
+
+    /* write down the data */
+    ret = lseek(bfd, INO2DOFF(ysb, ROOT_INO), SEEK_SET);
+    if (ret == -1) {
+        ret = errno;
+        log(LOG_ERR, "lseek() failed with error %s", strerror(errno));
+        goto out;
+    }
+
+    if (write(bfd, &root, sizeof(root)) != sizeof(root)) {
+        ret = -EIO;
+        log(LOG_INFO, "write() failed");
+        goto out;
+    }
+
+    log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld "
+        "for the root inode", sizeof(root), INO2DOFF(ysb, ROOT_INO));
+    debug_inode(ROOT_INO, &root);
+    ret = 0;
+
+out:
+    return ret;
 }
 
 /* fill the disk data blocks section with relevant data */

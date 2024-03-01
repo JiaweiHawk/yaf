@@ -136,6 +136,10 @@
     #define INO2BID(sb, ino)    (BID_I_MIN((sb)) + \
                                  ((ino)) / YAF_BLOCK_SIZE)
 
+    /* convert inode number to the offset within its corresponding block */
+    #define INO2BOFF(sb, ino)   ((ino) % INODES_PER_BLOCK \
+                                 * sizeof(Yaf_Inode))
+
     #define YAF_INODE(inode) \
         ((Yaf_Inode_Info *)container_of(inode, Yaf_Inode_Info, vfs_inode))
 
