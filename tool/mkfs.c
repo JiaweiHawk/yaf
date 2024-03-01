@@ -63,6 +63,17 @@ static long write_superblock(int bfd, Yaf_Superblock *ysb, long bnr) {
     ysb->yaf_sb_info.nr_i = le32toh(ysb->yaf_sb_info.nr_i);
     ysb->yaf_sb_info.nr_d = le32toh(ysb->yaf_sb_info.nr_d);
 
+    log(LOG_INFO, "superblock is at blocks [%ld, %ld]",
+        BID_SB_MIN(ysb), BID_SB_MAX(ysb));
+    log(LOG_INFO, "inode bitmap section is at blocks [%ld, %ld]",
+        BID_IBP_MIN(ysb), BID_IBP_MAX(ysb));
+    log(LOG_INFO, "data bitmap section is at blocks [%ld, %ld]",
+        BID_DBP_MIN(ysb), BID_DBP_MAX(ysb));
+    log(LOG_INFO, "inode blocks section is at blocks [%ld, %ld]",
+        BID_I_MIN(ysb), BID_I_MAX(ysb));
+    log(LOG_INFO, "data blocks section is at blocks [%ld, %ld]",
+        BID_D_MIN(ysb), BID_D_MAX(ysb));
+
     ret = 0;
 
 out:

@@ -167,6 +167,17 @@ int yaf_fill_super(struct super_block *sb, void *data, int silent)
         goto iput_root;
     }
 
+    log(LOG_INFO, "superblock is at blocks [%ld, %ld]",
+        BID_SB_MIN(sb), BID_SB_MAX(sb));
+    log(LOG_INFO, "inode bitmap section is at blocks [%ld, %ld]",
+        BID_IBP_MIN(sb), BID_IBP_MAX(sb));
+    log(LOG_INFO, "data bitmap section is at blocks [%ld, %ld]",
+        BID_DBP_MIN(sb), BID_DBP_MAX(sb));
+    log(LOG_INFO, "inode blocks section is at blocks [%ld, %ld]",
+        BID_I_MIN(sb), BID_I_MAX(sb));
+    log(LOG_INFO, "data blocks section is at blocks [%ld, %ld]",
+        BID_D_MIN(sb), BID_D_MAX(sb));
+
     goto release_bh;
 
 iput_root:
