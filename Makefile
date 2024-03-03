@@ -23,7 +23,7 @@ srcs: driver tool
 
 tool:
 	bear --append --output ${PWD}/compile_commands.json -- \
-		gcc -g -Wall -Werror -o ${PWD}/tool/mkfs ${PWD}/tool/mkfs.c ${PWD}/tool/arguments.c
+		gcc -g -Wall -Werror -I${PWD}/kernel/build/include -o ${PWD}/tool/mkfs ${PWD}/tool/mkfs.c ${PWD}/tool/arguments.c
 	cp ${PWD}/tool/mkfs ${PWD}/shares
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf tool'
 
@@ -47,6 +47,7 @@ kernel:
 	fi
 	bear --append --output ${PWD}/compile_commands.json -- \
 		make -C ${PWD}/kernel -j ${NPROC}
+	make -C ${PWD}/kernel headers_install INSTALL_HDR_PATH=${PWD}/kernel/build -j ${NPROC}
 	@echo -e '\033[0;32m[*]\033[0mbuild the linux kernel'
 
 rootfs:
