@@ -16,7 +16,7 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -nographic
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-shutdown -no-reboot
 
-.PHONY: debug driver env kernel rootfs run srcs tool
+.PHONY: debug driver env kernel rootfs run srcs test tool
 
 srcs: driver tool
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf sources'
@@ -92,3 +92,22 @@ debug:
 	${QEMU} \
 		${QEMU_OPTIONS} \
 		-S -gdb tcp::${PORT}
+
+test:
+	if [ ! -d ${PWD}/shares/xfstest ]; then \
+		git clone --depth 1 git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git ${PWD}/shares/xfstest; \
+		\
+		#install linux kernel header \
+		sudo chroot ${PWD}/rootfs /bin/bash -c "apt update && apt install -y make gcc rsync"; \
+		sudo mount --bind ${PWD}/kernel ${PWD}/rootfs/mnt && \
+			sudo chroot ${PWD}/rootfs /bin/bash -c "cd /mnt; make headers_install INSTALL_HDR_PATH=/usr" && \
+			sudo umount ${PWD}/rootfs/mnt; \
+		\
+		#install necessary packages \
+		sudo chroot ${PWD}/rootfs /bin/bash -c "apt update && apt install -y acl attr automake bc dbench dump e2fsprogs fio gawk gcc git indent libacl1-dev libaio-dev libcap-dev libgdbm-dev libtool libtool-bin liburing-dev libuuid1 lvm2 make psmisc python3 quota sed uuid-dev uuid-runtime xfsprogs sqlite3 libgdbm-compat-dev exfatprogs f2fs-tools ocfs2-tools udftools xfsdump xfslibs-dev"; \
+		\
+		#build \
+		sudo mount --bind ${PWD}/shares ${PWD}/rootfs/mnt && \
+			sudo chroot ${PWD}/rootfs /bin/bash -c "cd /mnt/xfstest && make" && \
+			sudo umount ${PWD}/rootfs/mnt; \
+	fi
