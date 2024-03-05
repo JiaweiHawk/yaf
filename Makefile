@@ -35,7 +35,8 @@ driver:
 
 kernel:
 	if [ ! -d ${PWD}/kernel ]; then \
-		sudo apt-get install -y bc bear bison debootstrap dwarves flex libelf-dev libssl-dev; \
+		sudo apt update; \
+		sudo apt install -y bc bear bison debootstrap dwarves flex libelf-dev libssl-dev; \
 		wget -O ${PWD}/linux.tar.xz https://mirrors.ustc.edu.cn/kernel.org/linux/kernel/v6.x/linux-6.7.tar.xz; \
 		tar -Jxvf ${PWD}/linux.tar.xz; \
 		mv ${PWD}/linux-6.7 ${PWD}/kernel; \
@@ -52,11 +53,12 @@ kernel:
 
 rootfs:
 	if [ ! -d ${PWD}/rootfs ]; then \
-		sudo apt-get install -y debootstrap > /dev/null; \
+		sudo apt update; \
+		sudo apt-get install -y debootstrap; \
 		sudo debootstrap \
 			--components=main,contrib,non-free,non-free-firmware \
 			stable ${PWD}/rootfs https://mirrors.ustc.edu.cn/debian/; \
-		sudo chroot ${PWD}/rootfs /bin/bash -c "apt install -y gdb strace"; \
+		sudo chroot ${PWD}/rootfs /bin/bash -c "apt update && apt install -y gdb strace"; \
 		mkdir shares; \
 		\
 		#configure shared directory \
