@@ -105,9 +105,12 @@ test:
 		\
 		#install necessary packages \
 		sudo chroot ${PWD}/rootfs /bin/bash -c "apt update && apt install -y acl attr automake bc dbench dump e2fsprogs fio gawk gcc git indent libacl1-dev libaio-dev libcap-dev libgdbm-dev libtool libtool-bin liburing-dev libuuid1 lvm2 make psmisc python3 quota sed uuid-dev uuid-runtime xfsprogs sqlite3 libgdbm-compat-dev exfatprogs f2fs-tools ocfs2-tools udftools xfsdump xfslibs-dev"; \
+		pip3 install argparse coloredlogs; \
 		\
 		#build \
 		sudo mount --bind ${PWD}/shares ${PWD}/rootfs/mnt && \
 			sudo chroot ${PWD}/rootfs /bin/bash -c "cd /mnt/xfstest && make" && \
 			sudo umount ${PWD}/rootfs/mnt; \
 	fi
+
+	${PWD}/test.py --command='''${QEMU} ${QEMU_OPTIONS}'''
