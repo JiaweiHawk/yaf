@@ -4,11 +4,20 @@ This is a simple filesystem for linux to understand VFS(Virtual Filesystem).
 
 # Usage
 
-## Build the environment
+## build the environment
 
 Run the ```make env``` to generate the **YAF** environment image.
 
 With this image, you can try **YAF kernel module** and **YAF user-space tools** in the image.
+
+## boot the qemu
+
+Run the ```make run``` to boot up the qemu with **yak.ko** in **/mnt/shares** on guest and
+a test disk imgage **/dev/vda**
+
+## test with xfstests
+
+Run the ```make test``` to run the ![xfstests](https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/) on the yaf environment
 
 # Design
 

@@ -12,11 +12,12 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -append "rdinit=/sbin
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -initrd ${PWD}/rootfs.cpio
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -fsdev local,id=shares,path=${PWD}/shares,security_model=passthrough
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -device virtio-9p-pci,fsdev=shares,mount_tag=shares
+QEMU_OPTIONS                            := ${QEMU_OPTIONS} -drive file=${PWD}/test.img,index=0,if=virtio,media=disk,format=raw
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -nographic
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-shutdown -no-reboot
 
-.PHONY: debug driver env kernel rootfs run srcs test tool
+.PHONY: debug driver env img kernel rootfs run srcs test tool
 
 srcs: driver tool
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf sources'
@@ -80,7 +81,13 @@ rootfs:
 	cd ${PWD}/rootfs; sudo find . | sudo cpio -o --format=newc -F ${PWD}/rootfs.cpio >/dev/null
 	@echo -e '\033[0;32m[*]\033[0mbuild the rootfs'
 
-env: kernel rootfs srcs
+img:
+	if [ ! -d ${PWD}/test.img ]; then \
+		dd if=/dev/zero of=${PWD}/test.img bs=1M count=1024 status=progress; \
+	fi
+	@echo -e '\033[0;32m[*]\033[0mbuild the yaf test image'
+
+env: kernel rootfs srcs img
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf environment'
 
 run:
