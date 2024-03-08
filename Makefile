@@ -13,7 +13,9 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -initrd ${PWD}/rootfs
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -fsdev local,id=shares,path=${PWD}/shares,security_model=passthrough
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -device virtio-9p-pci,fsdev=shares,mount_tag=shares
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -drive file=${PWD}/test.img,index=0,if=virtio,media=disk,format=raw
-QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
+ifeq ($(shell lsmod | awk '/^kvm /{print $$1}'), kvm)
+	QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
+endif
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -nographic
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -no-reboot
 
