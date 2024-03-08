@@ -28,14 +28,13 @@ class Qemu:
         self._write("root\n")
         self._runtil("root@vm2204:~#")
 
-    def _read(self, timeout=90) -> None:
+    def _read(self, timeout=1) -> None:
         rset, _, _ = select.select([self.proc.stdout.fileno()], [], [], timeout)
-        if (len(rset) == 0):
-            self.proc.poll()
-            if (self.proc.returncode == None):
-                return
-            else:
-                raise QemuTerminate
+
+        self.proc.poll()
+        if (self.proc.returncode != None):
+            raise QemuTerminate
+
         self.outbytes += os.read(self.proc.stdout.fileno(), 4096)
         res = self.outbytes.decode("utf-8", "ignore")
         self.output += res
