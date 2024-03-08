@@ -19,4 +19,4 @@ jobs:
 
     - name: run the test suite
       run: |
-        make test
+        sudo make test
