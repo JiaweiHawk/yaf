@@ -82,7 +82,7 @@ rootfs:
 	@echo -e '\033[0;32m[*]\033[0mbuild the rootfs'
 
 img:
-	if [ ! -d ${PWD}/test.img ]; then \
+	if [ ! -f ${PWD}/test.img ]; then \
 		dd if=/dev/zero of=${PWD}/test.img bs=1M count=1024 status=progress; \
 	fi
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf test image'
