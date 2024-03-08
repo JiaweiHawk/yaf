@@ -1,7 +1,7 @@
 PWD                                     := $(shell pwd)
 NPROC                                   := $(shell nproc)
 PORT                                    := 1234
-MEM                                     := 2G
+MEM                                     := 4G
 SMP                                     := 2
 
 QEMU                                    := qemu-system-x86_64
