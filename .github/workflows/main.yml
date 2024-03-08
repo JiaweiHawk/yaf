@@ -15,6 +15,7 @@ jobs:
     - name: build the environment
       run: |
         make env
+        sudo apt install -y qemu-system
 
     - name: run the test suite
       run: |
