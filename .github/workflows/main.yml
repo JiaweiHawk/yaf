@@ -1,0 +1,21 @@
+name: xfstests
+
+on:
+  push: {}
+  pull_request: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v3
+
+    - name: build the environment
+      run: |
+        make env
+
+    - name: run the test suite
+      run: |
+        make test
