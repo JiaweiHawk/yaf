@@ -19,7 +19,7 @@ a test disk imgage **/dev/vda**
 
 ## test with xfstests
 
-Run the ```make test``` to run the ![xfstests](https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/) on the yaf environment
+Run the ```make test``` to run the [xfstests](https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/) on the yaf environment
 
 # Design
 
