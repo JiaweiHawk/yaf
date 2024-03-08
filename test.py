@@ -24,9 +24,9 @@ class Qemu:
         self.output = ""
         self.outbytes = bytearray()
 
-        self._runtil("vm2204 login:")
+        self._runtil("login:")
         self._write("root\n")
-        self._runtil("root@vm2204:~#")
+        self._runtil(":~#")
 
     def _read(self, timeout=1) -> None:
         rset, _, _ = select.select([self.proc.stdout.fileno()], [], [], timeout)
@@ -60,7 +60,7 @@ class Qemu:
 
     def execute(self, command:str) -> None:
         self._write(command + "\n")
-        self._runtil("root@vm2204:~#")
+        self._runtil(":~#")
 
     def kill(self) -> None:
         self.proc.kill()
