@@ -46,7 +46,7 @@ kernel:
 		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_DEBUG_INFO_DWARF5 && yes "" | make oldconfig); \
 		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_GDB_SCRIPTS && yes "" | make oldconfig); \
 		(cd ${PWD}/kernel && ./scripts/config -e CONFIG_X86_X2APIC && yes "" | make oldconfig); \
-		make -C ${PWD}/kernel headers_install INSTALL_HDR_PATH=${PWD}/kernel/build -j ${NPROC}
+		make -C ${PWD}/kernel headers_install INSTALL_HDR_PATH=${PWD}/kernel/build -j ${NPROC}; \
 	fi
 	bear --append --output ${PWD}/compile_commands.json -- \
 		make -C ${PWD}/kernel -j ${NPROC}
