@@ -1,5 +1,7 @@
 # Yet Another Filesystem
 
+[![github CI](https://github.com/JiaweiHawk/yaf/actions/workflows/main.yml/badge.svg)](https://github.com/JiaweiHawk/yaf/actions/)
+
 This is a simple filesystem for linux to understand VFS(Virtual Filesystem).
 
 # Usage
