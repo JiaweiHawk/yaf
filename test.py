@@ -79,8 +79,25 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     try:
+        logger.info("Boot up the Qemu")
         qemu = Qemu(command=args.command)
-        qemu.execute("whoami")
+
+        logger.info("insmod the yaf module")
+        qemu.execute("insmod /mnt/shares/yaf.ko")
+
+        logger.info("format the disk device")
+        qemu.execute("/mnt/shares/mkfs /dev/vda")
+
+        qemu.execute("mkdir -p test")
+
+        logger.info("mount the device")
+        qemu.execute("mount -t yaf /dev/vda test")
+
+        logger.info("umount the device")
+        qemu.execute("umount test")
+
+        logger.info("remove the yaf module")
+        qemu.execute("rmmod yaf")
     except:
         traceback.print_exc()
         ret = -1
