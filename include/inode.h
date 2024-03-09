@@ -75,19 +75,20 @@
      * │i_block[6]│  │◄────────────────────────────────────►│i_block[6]│block id for the dentry block│
      * ├──────────┼──┤                                      ├──────────┼─────────────────────────────┤◄──60 bytes
      * │i_block[7]│  │◄────────────────────────────────────►│i_block[7]│block id for the dentry block│
-     * └──────────┴──┘                                      └──────────┴───────────┬─────────────────┘◄──64 bytes
-     * struct yaf_inode_info                                                       │
-     *                                                                             │
-     *                                                                             │
-     *                    dentry ◄───────────────────────────────────┐             ▼
-     *  ┌──────────┬─────────────────────────┐◄──0    bytes          │       dentry block
-     *  │d_ino     │inode id for the dentry  │                       │      ┌───────────┬───────────────┐◄──0    bytes
-     *  ├──────────┼─────────────────────────┤◄──4    bytes          └──────┤dentry[0]  │directory entry│
-     *  │d_name_len│length of the dentry name│                              ├───────────┼───────────────┤◄──32   bytes
-     *  ├──────────┼─────────────────────────┤◄──8    bytes                 │ ........  │               │
-     *  │d_name    │dentry name              │                              ├───────────┼───────────────┤◄──4064 bytes
-     *  └──────────┴─────────────────────────┘◄──32   bytes                 │dentry[128]│directory entry│
-     *                                                                      └───────────┴───────────────┘◄──4096 bytes
+     * └──────────┴──┘                                      └──────────┴──────────┬──────────────────┘◄──64 bytes
+     * struct yaf_inode_info                                                      │
+     *                                                                            │
+     *                                                                            │
+     *                    dentry ◄──────────────────────────────────┐             ▼
+     * ┌──────────┬─────────────────────────┐◄──0    bytes          │       dentry block
+     * │d_ino     │inode id for the dentry  │                       │      ┌───────────┬───────────────┐◄──0    bytes
+     * ├──────────┼─────────────────────────┤◄──4    bytes          └──────┤dentry[0]  │directory entry│
+     * │d_status  │status of the dentry     │                              ├───────────┼───────────────┤◄──32   bytes
+     * ├──────────┼─────────────────────────┤◄──6    bytes                 │ ........  │               │
+     * │d_name_len│length of the dentry name│                              ├───────────┼───────────────┤◄──4064 bytes
+     * ├──────────┼─────────────────────────┤◄──8    bytes                 │dentry[128]│directory entry│
+     * │d_name    │dentry name              │                              └───────────┴───────────────┘◄──4096 bytes
+     * └──────────┴─────────────────────────┘◄──32   bytes
      */
     #ifdef __KERNEL__
         #include <linux/types.h>
@@ -114,9 +115,17 @@
         uint32_t i_block[8];        /* block ids for the data block */
     } Yaf_Inode;
 
+    #define YAF_DENTRY_SIZE     32
+    #define YAF_DENTRY_NAME_LEN (YAF_DENTRY_SIZE - \
+        sizeof(uint32_t) - sizeof(uint16_t) - sizeof(uint16_t))
+
     typedef struct YAF_DENTRY {
-        uint32_t d_ino;         /* inode id for the dentry */
-        uint32_t d_name_len;    /* length of the dentry name */
+        uint32_t d_ino;                     /* inode id for the dentry */
+        uint16_t d_status;                  /* status of the dentry */
+#define YAF_DENTRY_STATUS_UNUSE 0
+#define YAF_DENTRY_STATUS_INUSE 1
+        uint16_t d_name_len;                /* length of the dentry name */
+        char d_name[YAF_DENTRY_NAME_LEN];   /* dentry name */
     } Yaf_Dentry;
 
     #ifndef __KERNEL__
@@ -124,6 +133,7 @@
     #endif // __KERNEL__
     #include "super.h"
     static_assert(YAF_BLOCK_SIZE % sizeof(Yaf_Inode) == 0);
+    static_assert(sizeof(Yaf_Dentry) == YAF_DENTRY_SIZE);
 
     /* inode number for the root inode of yaf */
     #define ROOT_INO    0
