@@ -25,13 +25,13 @@ MODULE_AUTHOR("Hawkins Jiawei");
  * baesd on the *mount_hashtable*, according to
  * https://zhuanlan.zhihu.com/p/606596107.
 
-                                       struct file_system_type
-                                          ┌─────────┬─────┐
-                                          │name     │"yaf"│
-                                          ├─────────┼─────┤
-                                          │fs_supers│     │◄───┐     struct super_block◄─┐
-                                          └─────────┴─────┘    │      ┌───────────┬──┐   │
-                                                               └──────┤s_instances│  │   │
+                                       struct file_system_type◄──┐
+                                          ┌─────────┬─────┐      │
+                                          │name     │"yaf"│      │   struct super_block◄─┐
+                                          ├─────────┼─────┤      │    ┌───────────┬──┐   │
+                                          │fs_supers│     │◄───┐ └────┤s_type     │  │   │
+                                          └─────────┴─────┘    │      ├───────────┼──┤   │
+                                                               └─────►│s_instances│  │   │
                                                                       ├───────────┼──┤   │
                                                                       │s_mounts   │  │   │
                                                                       ├───────────┼──┤   │
