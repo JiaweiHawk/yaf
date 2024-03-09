@@ -49,7 +49,7 @@ MODULE_AUTHOR("Hawkins Jiawei");
 │  ┌─────────┬──────────────┐                              │
 │  │d_name   │"mnt"         │                              │
 │  ├─────────┼──────────────┤                              │
-└─►│d_subdirs│              │             struct mount     │          struct mount
+└─►│d_child  │              │             struct mount     │          struct mount
    ├─────────┼──────────────┤          ┌──────────────┬──┐ │       ┌──────────────┬──┐
    │d_flags  │DCACHE_MOUNTED│          │mnt           │  ├─┘       │mnt           │  │
    └─────────┴──────────────┘          ├──────────────┼──┤         ├──────────────┼──┤
