@@ -144,8 +144,8 @@
     /* number of inodes per block */
     #define INODES_PER_BLOCK    (YAF_BLOCK_SIZE / sizeof(Yaf_Inode))
 
-    /* convert inode number to the corresponding block id */
     #include "fs.h"
+    /* convert inode number to the corresponding block id */
     #define INO2BID(sb, ino)    (BID_I_MIN((sb)) + \
                                  ((ino)) / YAF_BLOCK_SIZE)
 
