@@ -5,6 +5,82 @@
 #include "../include/inode.h"
 
 /*
+ * The name to look for is found in the dentry.
+ *
+ * This method must call *d_add()* to insert the found inode
+ * into the dentry.
+ *
+ * If the named inode does not exist a NULL inode should be inserted
+ * into the dentry (this is called a negative dentry). Returning an
+ * error code from this routine must only be done on a real error,
+ * otherwise creating inodes with system calls will fail.
+ */
+static struct dentry* yaf_lookup(struct inode *dir,
+                        struct dentry *dentry, unsigned int flags)
+{
+    Yaf_Inode_Info *yii = YAF_INODE(dir);
+    struct super_block *sb = dir->i_sb;
+    struct inode *inode = NULL;
+    int doff = 0;
+
+    /* check the dentry name length */
+    if (dentry->d_name.len > YAF_DENTRY_NAME_LEN) {
+        log(LOG_ERR, "dentry->d_name.len = %d is too long for [1, %ld]",
+            dentry->d_name.len, YAF_DENTRY_NAME_LEN);
+        return ERR_PTR(-ENAMETOOLONG);
+    }
+
+    /* search for the dentry in directory */
+    while(doff < dir->i_size) {
+        Yaf_Dentry *yd;
+        struct buffer_head *bh = sb_bread(sb,
+                    INO2BID(sb, yii->i_block[doff / DENTRYS_PER_BLOCK]));
+        if (!bh) {
+            log(LOG_ERR, "sb_bread() failed");
+            return ERR_PTR(-EIO);
+        }
+
+        yd = (Yaf_Dentry *)bh->b_data;
+        for(int i = 0; i < DENTRYS_PER_BLOCK; ++i, doff += YAF_DENTRY_SIZE) {
+            if (yd->d_status == YAF_DENTRY_STATUS_INUSE &&
+                !strncmp(yd->d_name, dentry->d_name.name,
+                        YAF_DENTRY_NAME_LEN)) {
+                inode = yaf_iget(sb, yd->d_ino);
+                brelse(bh);
+                if (IS_ERR(inode)) {
+                    log(LOG_ERR, "yaf_iget() failed with error code %ld",
+                        PTR_ERR(inode));
+                    return ERR_CAST(inode);
+                }
+                goto out;
+            }
+        }
+
+        brelse(bh);
+    }
+
+out:
+
+    /* update the directory access time */
+    dir->__i_atime = current_time(dir);
+    mark_inode_dirty(dir);
+
+    /* fill the dentry with the inode */
+    d_add(dentry, inode);
+
+    return NULL;
+}
+
+/*
+ * describes how the VFS can manipulate an inode according to
+ * https://docs.kernel.org/next/filesystems/vfs.html#struct-inode-operations
+ */
+static const struct inode_operations yaf_inode_ops = {
+    .lookup = yaf_lookup,   /* called when the VFS needs to
+                    look up an inode in a parent directory */
+};
+
+/*
  * yaf_iget() is responsible for parsing the on-disk inode,
  * creating and initializing an in-memory inode based on
  * the inode number.
@@ -42,6 +118,7 @@ struct inode* yaf_iget(struct super_block *sb, unsigned long ino) {
     yi = (Yaf_Inode *)bh->b_data + (ino % INODES_PER_BLOCK);
 
     /* initialize *struct inode* */
+    inode->i_op = &yaf_inode_ops;
     inode->i_mode = le32_to_cpu(yi->i_mode);
     i_uid_write(inode, le32_to_cpu(yi->i_uid));
     i_gid_write(inode, le32_to_cpu(yi->i_gid));

@@ -153,6 +153,10 @@
     #define INO2BOFF(sb, ino)   ((ino) % INODES_PER_BLOCK \
                                  * sizeof(Yaf_Inode))
 
+    /* number of dentrys per block */
+    #define DENTRYS_PER_BLOCK   (YAF_BLOCK_SIZE / YAF_DENTRY_SIZE)
+    #define MAX_DENTRYS         (YAF_IBLOCKS * DENTRYS_PER_BLOCK)
+
     #define YAF_INODE(inode) \
         ((Yaf_Inode_Info *)container_of(inode, Yaf_Inode_Info, vfs_inode))
 
