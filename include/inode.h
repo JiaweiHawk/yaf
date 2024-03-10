@@ -90,6 +90,9 @@
      * │d_name    │dentry name              │                              └───────────┴───────────────┘◄──4096 bytes
      * └──────────┴─────────────────────────┘◄──32   bytes
      */
+
+    /* the array size of *i_block* */
+    #define YAF_IBLOCKS         8
     #ifdef __KERNEL__
         #include <linux/types.h>
         #include <linux/fs.h>
@@ -104,15 +107,15 @@
 
     /* on-disk inode structure */
     typedef struct YAF_INODE {
-        uint32_t i_mode;            /* file mode */
-        uint32_t i_uid;             /* owner id */
-        uint32_t i_gid;             /* group id */
-        uint32_t i_nlink;           /* number of hard links */
-        uint32_t i_size;            /* inode data size in bytes */
-        uint32_t i_atime;           /* inode access time */
-        uint32_t i_mtime;           /* inode modification time */
-        uint32_t i_ctime;           /* inode change time */
-        uint32_t i_block[8];        /* block ids for the data block */
+        uint32_t i_mode;                /* file mode */
+        uint32_t i_uid;                 /* owner id */
+        uint32_t i_gid;                 /* group id */
+        uint32_t i_nlink;               /* number of hard links */
+        uint32_t i_size;                /* inode data size in bytes */
+        uint32_t i_atime;               /* inode access time */
+        uint32_t i_mtime;               /* inode modification time */
+        uint32_t i_ctime;               /* inode change time */
+        uint32_t i_block[YAF_IBLOCKS];  /* block ids for the data block */
     } Yaf_Inode;
 
     #define YAF_DENTRY_SIZE     32
