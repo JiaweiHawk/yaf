@@ -10,7 +10,7 @@ QEMU_OPTIONS                            := ${QEMU_OPTIONS} -m ${MEM}
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -kernel ${PWD}/kernel/arch/x86_64/boot/bzImage
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -append "rdinit=/sbin/init panic=-1 console=ttyS0 nokaslr"
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -initrd ${PWD}/rootfs.cpio
-QEMU_OPTIONS                            := ${QEMU_OPTIONS} -fsdev local,id=shares,path=${PWD}/shares,security_model=passthrough
+QEMU_OPTIONS                            := ${QEMU_OPTIONS} -fsdev local,id=shares,path=${PWD}/shares,security_model=none
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -device virtio-9p-pci,fsdev=shares,mount_tag=shares
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -drive file=${PWD}/test.img,index=0,if=virtio,media=disk,format=raw
 QEMU_OPTIONS                            := ${QEMU_OPTIONS} -enable-kvm
