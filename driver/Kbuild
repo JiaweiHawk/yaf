@@ -1,2 +1,2 @@
 obj-m	:= yaf.o
-yaf-y 	:= fs.o super.o inode.o
+yaf-y 	:= dir.o fs.o inode.o super.o

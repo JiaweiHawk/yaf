@@ -3,6 +3,7 @@
 #include <linux/byteorder/generic.h>
 #include "../include/yaf.h"
 #include "../include/inode.h"
+#include "../include/dir.h"
 
 /*
  * The name to look for is found in the dentry.
@@ -129,6 +130,9 @@ struct inode* yaf_iget(struct super_block *sb, unsigned long ino) {
     inode_set_ctime(inode, le32_to_cpu(yi->i_ctime), 0);
     for (int i = 0; i < ARRAY_SIZE(yii->i_block); ++i) {
         yii->i_block[i] = le32_to_cpu(yi->i_block[i]);
+    }
+    if (S_ISDIR(inode->i_mode)) {
+        inode->i_fop = &yaf_dir_ops;
     }
 
     /* unlock the inode to make it available */

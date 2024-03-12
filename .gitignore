@@ -11,6 +11,7 @@
 # pattern for files in driver directory
 !driver
 driver/*
+!driver/dir.c
 !driver/fs.c
 !driver/inode.c
 !driver/Makefile
@@ -27,6 +28,7 @@ tool/*
 !include
 include/*
 !include/bitmap.h
+!include/dir.h
 !include/fs.h
 !include/inode.h
 !include/super.h
