@@ -22,8 +22,6 @@
      * ──────────────────────────────────────────────────────────────────►
      *                             bitmap idx growth direction
      */
-
-    /* convert inode number to the  */
     #include "super.h"
 
     #ifdef __KERNEL__
