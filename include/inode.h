@@ -144,7 +144,7 @@
     #include "fs.h"
     /* convert inode number to the corresponding block id */
     #define INO2BID(sb, ino)    (BID_I_MIN((sb)) + \
-                                 ((ino)) / YAF_BLOCK_SIZE)
+                                 ((ino)) / INODES_PER_BLOCK)
 
     /* convert inode number to the offset within its corresponding block */
     #define INO2BOFF(sb, ino)   ((ino) % INODES_PER_BLOCK \
