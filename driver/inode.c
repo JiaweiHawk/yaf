@@ -35,7 +35,7 @@ static struct dentry* yaf_lookup(struct inode *dir,
     while(doff < dir->i_size) {
         Yaf_Dentry *yd;
         struct buffer_head *bh = sb_bread(sb,
-                    INO2BID(sb, yii->i_block[doff / DENTRYS_PER_BLOCK]));
+                    DNO2BID(sb, yii->i_block[doff / DENTRYS_PER_BLOCK]));
         if (!bh) {
             log(LOG_ERR, "sb_bread() failed");
             return ERR_PTR(-EIO);
