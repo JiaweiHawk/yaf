@@ -93,6 +93,8 @@ if __name__ == "__main__":
         logger.info("mount the device")
         qemu.execute("mount -t yaf /dev/vda test")
 
+        qemu.execute("ls -a test")
+
         logger.info("umount the device")
         qemu.execute("umount test")
 
