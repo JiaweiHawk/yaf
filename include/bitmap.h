@@ -40,7 +40,7 @@
 
     /* convert bitmap idx to the offset within its corresponding block */
     static inline uint32_t IDX2BKOFF(uint32_t idx) {
-        return idx % BITS_PER_BLOCK;
+        return (idx % BITS_PER_BLOCK) / BITS_PER_BYTE;
     }
 
     #include "fs.h"
