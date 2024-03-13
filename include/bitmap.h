@@ -43,8 +43,6 @@
         return (idx % BITS_PER_BLOCK) / BITS_PER_BYTE;
     }
 
-    #include "fs.h"
-
     /* convert inode bitmap idx to the corresponding block id */
     #define IDXI2BID(sb, idx)   (BID_IBP_MIN(sb) \
                                  + (idx) / BITS_PER_BLOCK)
