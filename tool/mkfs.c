@@ -98,7 +98,7 @@ out:
 /* fill the disk inode bitmap section with relevant data */
 static long write_inode_bitmap(int bfd, Yaf_Superblock *ysb) {
     long ret = 0;
-    uint8_t byte;
+    uint8_t byte = 0;
 
     /* zero the inode bitmap section */
     for (int i = 0; i < le32toh(ysb->yaf_sb_info.nr_ibp); ++i) {
@@ -122,14 +122,15 @@ static long write_inode_bitmap(int bfd, Yaf_Superblock *ysb) {
             (BID_IBP_MIN(ysb) + i) * YAF_BLOCK_SIZE);
     }
 
-    /* mark the reserved inode */
+    /* mark the reserved and root inode */
     ret = lseek(bfd, IDXI2DOFF(ysb, RESERVED_INO), SEEK_SET);
     if (ret == -1) {
         ret = errno;
         log(LOG_ERR, "lseek() failed with error %s", strerror(errno));
         goto out;
     }
-    byte = yaf_set_bit(0, IDX2BKOFF(RESERVED_INO));
+    byte = yaf_set_bit(byte, IDX2BEOFF(RESERVED_INO));
+    byte = yaf_set_bit(byte, IDX2BEOFF(ROOT_INO));
     ret = write(bfd, &byte, sizeof(byte));
     if (ret != sizeof(byte)) {
         ret = -EIO;
@@ -137,27 +138,9 @@ static long write_inode_bitmap(int bfd, Yaf_Superblock *ysb) {
         goto out;
     }
     log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld, "
-        "byte offset %d for the reserved inode in inode bitmap",
-        sizeof(byte), IDXI2DOFF(ysb, RESERVED_INO),
+        "byte offset %d for the reserved inode and root inode "
+        "in inode bitmap", sizeof(byte), IDXI2DOFF(ysb, RESERVED_INO),
         IDX2BEOFF(RESERVED_INO));
-
-    /* mark the root inode */
-    ret = lseek(bfd, IDXI2DOFF(ysb, ROOT_INO), SEEK_SET);
-    if (ret == -1) {
-        ret = errno;
-        log(LOG_ERR, "lseek() failed with error %s", strerror(errno));
-        goto out;
-    }
-    byte = yaf_set_bit(0, IDX2BKOFF(ROOT_INO));
-    ret = write(bfd, &byte, sizeof(byte));
-    if (ret != sizeof(byte)) {
-        ret = -EIO;
-        log(LOG_INFO, "write() failed");
-        goto out;
-    }
-    log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld, "
-        "byte offset %d for the root inode in inode bitmap", sizeof(byte),
-        IDXI2DOFF(ysb, ROOT_INO), IDX2BEOFF(ROOT_INO));
 
     ret = 0;
 
