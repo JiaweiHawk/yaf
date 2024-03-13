@@ -43,7 +43,7 @@ static struct dentry* yaf_lookup(struct inode *dir,
 
         yd = (Yaf_Dentry *)bh->b_data;
         for(int i = 0; i < DENTRYS_PER_BLOCK; ++i, doff += YAF_DENTRY_SIZE) {
-            if (yd->d_status == YAF_DENTRY_STATUS_INUSE &&
+            if (yd->d_ino != RESERVED_INO &&
                 !strncmp(yd->d_name, dentry->d_name.name,
                         YAF_DENTRY_NAME_LEN)) {
                 inode = yaf_iget(sb, yd->d_ino);

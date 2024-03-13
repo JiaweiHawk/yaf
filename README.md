@@ -166,17 +166,15 @@ struct yaf_inode_info                                                       │
 └──────────┴──┘                                      └──────────┴──────────┬──────────────────┘◄──64 bytes
 struct yaf_inode_info                                                      │
                                                                            │
-                                                                           │
                    dentry ◄──────────────────────────────────┐             ▼
 ┌──────────┬─────────────────────────┐◄──0    bytes          │       dentry block
 │d_ino     │inode id for the dentry  │                       │      ┌───────────┬───────────────┐◄──0    bytes
 ├──────────┼─────────────────────────┤◄──4    bytes          └──────┤dentry[0]  │directory entry│
-│d_status  │status of the dentry     │                              ├───────────┼───────────────┤◄──32   bytes
-├──────────┼─────────────────────────┤◄──6    bytes                 │ ........  │               │
-│d_name_len│length of the dentry name│                              ├───────────┼───────────────┤◄──4064 bytes
-├──────────┼─────────────────────────┤◄──8    bytes                 │dentry[128]│directory entry│
-│d_name    │dentry name              │                              └───────────┴───────────────┘◄──4096 bytes
-└──────────┴─────────────────────────┘◄──32   bytes
+│d_name_len│length of the dentry name│                              ├───────────┼───────────────┤◄──32   bytes
+├──────────┼─────────────────────────┤◄──8    bytes                 │ ........  │               │
+│d_name    │dentry name              │                              ├───────────┼───────────────┤◄──4064 bytes
+└──────────┴─────────────────────────┘◄──32   bytes                 │dentry[128]│directory entry│
+                                                                    └───────────┴───────────────┘◄──4096 bytes
 ```
 
 # Reference 
