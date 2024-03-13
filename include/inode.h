@@ -138,8 +138,10 @@
     static_assert(YAF_BLOCK_SIZE % sizeof(Yaf_Inode) == 0);
     static_assert(sizeof(Yaf_Dentry) == YAF_DENTRY_SIZE);
 
+    /* this is reserved as invalid inode number */
+    #define RESERVED_INO    0
     /* inode number for the root inode of yaf */
-    #define ROOT_INO    0
+    #define ROOT_INO        1
 
     /* number of inodes per block */
     #define INODES_PER_BLOCK    (YAF_BLOCK_SIZE / sizeof(Yaf_Inode))

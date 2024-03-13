@@ -122,6 +122,25 @@ static long write_inode_bitmap(int bfd, Yaf_Superblock *ysb) {
             (BID_IBP_MIN(ysb) + i) * YAF_BLOCK_SIZE);
     }
 
+    /* mark the reserved inode */
+    ret = lseek(bfd, IDXI2DOFF(ysb, RESERVED_INO), SEEK_SET);
+    if (ret == -1) {
+        ret = errno;
+        log(LOG_ERR, "lseek() failed with error %s", strerror(errno));
+        goto out;
+    }
+    byte = yaf_set_bit(0, IDX2BKOFF(RESERVED_INO));
+    ret = write(bfd, &byte, sizeof(byte));
+    if (ret != sizeof(byte)) {
+        ret = -EIO;
+        log(LOG_INFO, "write() failed");
+        goto out;
+    }
+    log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld, "
+        "byte offset %d for the reserved inode in inode bitmap",
+        sizeof(byte), IDXI2DOFF(ysb, RESERVED_INO),
+        IDX2BEOFF(RESERVED_INO));
+
     /* mark the root inode */
     ret = lseek(bfd, IDXI2DOFF(ysb, ROOT_INO), SEEK_SET);
     if (ret == -1) {
@@ -136,9 +155,9 @@ static long write_inode_bitmap(int bfd, Yaf_Superblock *ysb) {
         log(LOG_INFO, "write() failed");
         goto out;
     }
-    log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld "
-        "for the root inode in inode bitmap", sizeof(byte),
-        IDXI2DOFF(ysb, ROOT_INO));
+    log(LOG_INFO, "Writing %ld byte(s) at disk offset %ld, "
+        "byte offset %d for the root inode in inode bitmap", sizeof(byte),
+        IDXI2DOFF(ysb, ROOT_INO), IDX2BEOFF(ROOT_INO));
 
     ret = 0;
 
@@ -215,7 +234,7 @@ static long write_inode_blocks(int bfd, Yaf_Superblock *ysb) {
     root.i_size = 0;
     memset(&root.i_block, 0, sizeof(root.i_block));
 
-    /* write down the data */
+    /* write down the root inode */
     ret = lseek(bfd, INO2DOFF(ysb, ROOT_INO), SEEK_SET);
     if (ret == -1) {
         ret = errno;
