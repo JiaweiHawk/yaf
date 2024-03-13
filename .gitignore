@@ -11,6 +11,7 @@
 # pattern for files in driver directory
 !driver
 driver/*
+!driver/bitmap.c
 !driver/dir.c
 !driver/fs.c
 !driver/inode.c

@@ -125,6 +125,8 @@
     #define RESERVED_INO    0
     /* inode number for the root inode of yaf */
     #define ROOT_INO        1
+    /* this is reserved as invalid data block number */
+    #define RESERVED_DNO    -1
 
     /* number of inodes per block */
     #define INODES_PER_BLOCK    (YAF_BLOCK_SIZE / sizeof(Yaf_Inode))
