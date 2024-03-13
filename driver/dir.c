@@ -53,7 +53,8 @@ static int yaf_iterate_shared(struct file *dir, struct dir_context *ctx) {
         }
 
         yd = (Yaf_Dentry *)(bh->b_data);
-        for(int i = iboff / YAF_DENTRY_SIZE; i < DENTRYS_PER_BLOCK;
+        for(int i = iboff / YAF_DENTRY_SIZE;
+            i < DENTRYS_PER_BLOCK && doff < dinode->i_size;
             ++i, doff += YAF_DENTRY_SIZE) {
             if (yd->d_ino != RESERVED_INO) {
                 if (!dir_emit(ctx, yd->d_name, yd->d_name_len,
