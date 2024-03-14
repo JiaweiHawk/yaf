@@ -95,7 +95,10 @@ if __name__ == "__main__":
 
         qemu.execute("ls -a test")
 
-        qemu.execute("mkdir -p test/a")
+        qemu.execute("mkdir -p test/dir")
+        qemu.execute("find test")
+
+        qemu.execute("touch test/file")
         qemu.execute("find test")
 
         logger.info("umount the device")

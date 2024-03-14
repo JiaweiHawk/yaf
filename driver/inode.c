@@ -120,7 +120,7 @@ static int64_t yaf_get_free_dentry(struct inode *dir)
 }
 
 /* create @dentry(a file or directory) in @dir */
-static int yaf_create(struct mnt_idmap *id, struct inode *dir,
+static int _yaf_create(struct mnt_idmap *id, struct inode *dir,
                       struct dentry *dentry, umode_t mode, bool excl)
 {
     Yaf_Inode_Info *dyii = YAF_INODE(dir);
@@ -181,7 +181,14 @@ static int yaf_create(struct mnt_idmap *id, struct inode *dir,
 static int yaf_mkdir(struct mnt_idmap *id, struct inode *dir,
                      struct dentry *dentry, umode_t mode)
 {
-    return yaf_create(id, dir, dentry, mode | S_IFDIR, 0);
+    return _yaf_create(id, dir, dentry, mode | S_IFDIR, 0);
+}
+
+/* create regular file */
+static int yaf_create(struct mnt_idmap *id, struct inode *dir,
+                     struct dentry *dentry, umode_t mode, bool excl)
+{
+    return _yaf_create(id, dir, dentry, mode | S_IFREG, excl);
 }
 
 /*
@@ -261,6 +268,8 @@ static const struct inode_operations yaf_inode_ops = {
                     look up an inode in a parent directory */
     .mkdir = yaf_mkdir,     /* called when the VFS needs to
                                create subdirectories.*/
+    .create = yaf_create,   /* called when the VFS needs to
+                               create files.*/
 };
 
 /*
