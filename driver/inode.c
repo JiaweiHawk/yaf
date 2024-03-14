@@ -72,7 +72,7 @@ static int64_t yaf_get_free_dentry(struct inode *dir)
     while(doff < dir->i_size) {
         Yaf_Dentry *yd;
         bh = sb_bread(sb,
-                DNO2BID(sb, dyii->i_block[doff / DENTRYS_PER_BLOCK]));
+                DNO2BID(sb, dyii->i_block[doff / YAF_BLOCK_SIZE]));
         if (!bh) {
             log(LOG_ERR, "sb_bread() failed");
             return -EIO;
@@ -101,14 +101,14 @@ static int64_t yaf_get_free_dentry(struct inode *dir)
             log(LOG_ERR, "there is not free data block on the disk");
             return -ENOSPC;
         }
-        dyii->i_block[doff / DENTRYS_PER_BLOCK] = dno;
+        dyii->i_block[doff / YAF_BLOCK_SIZE] = dno;
     }
 
     /* mark the found dentry as unuse */
     bh = sb_bread(sb,
-            DNO2BID(sb, dyii->i_block[doff / DENTRYS_PER_BLOCK]));
+            DNO2BID(sb, dyii->i_block[doff / YAF_BLOCK_SIZE]));
     assert(bh);
-    ((Yaf_Dentry *)(bh->b_data + doff % DENTRYS_PER_BLOCK))->d_ino = RESERVED_INO;
+    ((Yaf_Dentry *)(bh->b_data + doff % YAF_BLOCK_SIZE))->d_ino = RESERVED_INO;
     mark_buffer_dirty(bh);
     brelse(bh);
 
@@ -149,7 +149,7 @@ static int _yaf_create(struct mnt_idmap *id, struct inode *dir,
         return -EIO;
     }
     bh = sb_bread(sb,
-            DNO2BID(sb, dyii->i_block[doff / DENTRYS_PER_BLOCK]));
+            DNO2BID(sb, dyii->i_block[doff / YAF_BLOCK_SIZE]));
     if (!bh) {
         /*
          * here we do not need to put the free dentry,
@@ -158,7 +158,7 @@ static int _yaf_create(struct mnt_idmap *id, struct inode *dir,
         log(LOG_ERR, "sb_bread() failed");
         return -EIO;
     }
-    yd = (Yaf_Dentry *)(bh->b_data + doff % DENTRYS_PER_BLOCK);
+    yd = (Yaf_Dentry *)(bh->b_data + doff % YAF_BLOCK_SIZE);
 
     /* get on-disk free node */
     inode = yaf_new_inode(dir, mode);
@@ -221,7 +221,7 @@ static int64_t _yaf_lookup(struct inode *dir, struct dentry *dentry)
     while(doff < dir->i_size) {
         Yaf_Dentry *yd;
         struct buffer_head *bh = sb_bread(sb,
-                    DNO2BID(sb, yii->i_block[doff / DENTRYS_PER_BLOCK]));
+                    DNO2BID(sb, yii->i_block[doff / YAF_BLOCK_SIZE]));
         if (!bh) {
             log(LOG_ERR, "sb_bread() failed");
             return -EIO;
@@ -275,12 +275,12 @@ static struct dentry* yaf_lookup(struct inode *dir,
         return ERR_PTR(doff);
     }
 
-    bh = sb_bread(sb, DNO2BID(sb, yii->i_block[doff / DENTRYS_PER_BLOCK]));
+    bh = sb_bread(sb, DNO2BID(sb, yii->i_block[doff / YAF_BLOCK_SIZE]));
     if (!bh) {
         log(LOG_ERR, "sb_bread() failed");
         return ERR_PTR(-EIO);
     }
-    yd = (Yaf_Dentry *)(bh->b_data + doff % DENTRYS_PER_BLOCK);
+    yd = (Yaf_Dentry *)(bh->b_data + doff % YAF_BLOCK_SIZE);
 
     inode = yaf_iget(sb, le32_to_cpu(yd->d_ino));
     if (IS_ERR(inode)) {

@@ -45,9 +45,9 @@ static int yaf_iterate_shared(struct file *dir, struct dir_context *ctx) {
     /* iterate files in the directory from doff */
     while(doff < dinode->i_size) {
         Yaf_Dentry *yd;
-        uint64_t iboff = doff % DENTRYS_PER_BLOCK;
+        uint64_t iboff = doff % YAF_BLOCK_SIZE;
         struct buffer_head *bh = sb_bread(sb,
-                    DNO2BID(sb, dyii->i_block[doff / DENTRYS_PER_BLOCK]));
+                    DNO2BID(sb, dyii->i_block[doff / YAF_BLOCK_SIZE]));
         if (!bh) {
             log(LOG_ERR, "sb_bread() failed");
             return -EIO;
