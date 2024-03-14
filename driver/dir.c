@@ -1,5 +1,6 @@
 #include <asm-generic/errno-base.h>
 #include <linux/buffer_head.h>
+#include <linux/byteorder/generic.h>
 #include <linux/fs_types.h>
 #include <linux/stat.h>
 #include "../include/inode.h"
@@ -56,9 +57,9 @@ static int yaf_iterate_shared(struct file *dir, struct dir_context *ctx) {
         for(int i = iboff / YAF_DENTRY_SIZE;
             i < DENTRYS_PER_BLOCK && doff < dinode->i_size;
             ++i, ++yd, doff += YAF_DENTRY_SIZE) {
-            if (yd->d_ino != RESERVED_INO) {
-                if (!dir_emit(ctx, yd->d_name, yd->d_name_len,
-                              yd->d_ino, DT_UNKNOWN)) {
+            if (le32_to_cpu(yd->d_ino) != RESERVED_INO) {
+                if (!dir_emit(ctx, yd->d_name, le32_to_cpu(yd->d_name_len),
+                              le32_to_cpu(yd->d_ino), DT_UNKNOWN)) {
                     log(LOG_ERR, "dir_emit() for %s failed", yd->d_name);
                 }
             }

@@ -80,7 +80,7 @@ static int64_t yaf_get_free_dentry(struct inode *dir)
         yd = (Yaf_Dentry *)bh->b_data;
         for(int i = 0; i < DENTRYS_PER_BLOCK && doff < dir->i_size;
             ++i, ++yd, doff += YAF_DENTRY_SIZE) {
-            if (yd->d_ino == RESERVED_INO) {
+            if (le32_to_cpu(yd->d_ino) == RESERVED_INO) {
                 brelse(bh);
                 return doff;
             }
@@ -163,9 +163,9 @@ static int _yaf_create(struct mnt_idmap *id, struct inode *dir,
         return PTR_ERR(inode);
     }
 
-    yd->d_ino = inode->i_ino;
-    yd->d_name_len = dentry->d_name.len;
-    strncpy(yd->d_name, dentry->d_name.name, yd->d_name_len);
+    yd->d_ino = cpu_to_le32(inode->i_ino);
+    yd->d_name_len = cpu_to_le32(dentry->d_name.len);
+    strncpy(yd->d_name, dentry->d_name.name, YAF_DENTRY_NAME_LEN);
 
     mark_buffer_dirty(bh);
     brelse(bh);
@@ -216,7 +216,7 @@ static int64_t _yaf_lookup(struct inode *dir, struct dentry *dentry)
         yd = (Yaf_Dentry *)bh->b_data;
         for(int i = 0; i < DENTRYS_PER_BLOCK && doff < dir->i_size;
             ++i, ++yd, doff += YAF_DENTRY_SIZE) {
-            if (yd->d_ino != RESERVED_INO &&
+            if (le32_to_cpu(yd->d_ino) != RESERVED_INO &&
                 !strncmp(yd->d_name, dentry->d_name.name,
                         YAF_DENTRY_NAME_LEN)) {
                 brelse(bh);
@@ -268,7 +268,7 @@ static struct dentry* yaf_lookup(struct inode *dir,
     }
     yd = (Yaf_Dentry *)(bh->b_data + doff % DENTRYS_PER_BLOCK);
 
-    inode = yaf_iget(sb, yd->d_ino);
+    inode = yaf_iget(sb, le32_to_cpu(yd->d_ino));
     if (IS_ERR(inode)) {
         log(LOG_ERR, "yaf_iget() failed with error code %ld",
             PTR_ERR(inode));
