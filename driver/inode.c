@@ -9,8 +9,6 @@
 #include "../include/dir.h"
 #include "../include/inode.h"
 #include "../include/yaf.h"
-#include "linux/capability.h"
-#include "linux/dcache.h"
 
 /*
  * yaf_new_inode() is responsible for creating the on-disk inode
@@ -191,6 +189,47 @@ static int yaf_create(struct mnt_idmap *id, struct inode *dir,
     return _yaf_create(id, dir, dentry, mode | S_IFREG, excl);
 }
 
+/* return the on-disk dentry offset in the directory */
+static int64_t _yaf_lookup(struct inode *dir, struct dentry *dentry)
+{
+    struct super_block *sb = dir->i_sb;
+    Yaf_Inode_Info *yii = YAF_INODE(dir);
+    int64_t doff = 0;
+
+    /* check the dentry name length */
+    if (dentry->d_name.len > YAF_DENTRY_NAME_LEN) {
+        log(LOG_ERR, "dentry->d_name.len = %d is too long for [1, %ld]",
+            dentry->d_name.len, YAF_DENTRY_NAME_LEN);
+        return -ENAMETOOLONG;
+    }
+
+    /* search for the dentry in directory */
+    while(doff < dir->i_size) {
+        Yaf_Dentry *yd;
+        struct buffer_head *bh = sb_bread(sb,
+                    DNO2BID(sb, yii->i_block[doff / DENTRYS_PER_BLOCK]));
+        if (!bh) {
+            log(LOG_ERR, "sb_bread() failed");
+            return -EIO;
+        }
+
+        yd = (Yaf_Dentry *)bh->b_data;
+        for(int i = 0; i < DENTRYS_PER_BLOCK && doff < dir->i_size;
+            ++i, ++yd, doff += YAF_DENTRY_SIZE) {
+            if (yd->d_ino != RESERVED_INO &&
+                !strncmp(yd->d_name, dentry->d_name.name,
+                        YAF_DENTRY_NAME_LEN)) {
+                brelse(bh);
+                return doff;
+            }
+        }
+
+        brelse(bh);
+    }
+
+    return -ENOENT;
+}
+
 /*
  * The name to look for is found in the dentry.
  *
@@ -208,44 +247,36 @@ static struct dentry* yaf_lookup(struct inode *dir,
     Yaf_Inode_Info *yii = YAF_INODE(dir);
     struct super_block *sb = dir->i_sb;
     struct inode *inode = NULL;
-    int doff = 0;
-
-    /* check the dentry name length */
-    if (dentry->d_name.len > YAF_DENTRY_NAME_LEN) {
-        log(LOG_ERR, "dentry->d_name.len = %d is too long for [1, %ld]",
-            dentry->d_name.len, YAF_DENTRY_NAME_LEN);
-        return ERR_PTR(-ENAMETOOLONG);
-    }
+    int64_t doff = 0;
+    struct buffer_head *bh;
+    Yaf_Dentry *yd;
 
     /* search for the dentry in directory */
-    while(doff < dir->i_size) {
-        Yaf_Dentry *yd;
-        struct buffer_head *bh = sb_bread(sb,
-                    DNO2BID(sb, yii->i_block[doff / DENTRYS_PER_BLOCK]));
-        if (!bh) {
-            log(LOG_ERR, "sb_bread() failed");
-            return ERR_PTR(-EIO);
+    doff = _yaf_lookup(dir, dentry);
+    if (doff < 0) {
+        if (doff == -ENOENT) {
+            goto out;
         }
-
-        yd = (Yaf_Dentry *)bh->b_data;
-        for(int i = 0; i < DENTRYS_PER_BLOCK && doff < dir->i_size;
-            ++i, ++yd, doff += YAF_DENTRY_SIZE) {
-            if (yd->d_ino != RESERVED_INO &&
-                !strncmp(yd->d_name, dentry->d_name.name,
-                        YAF_DENTRY_NAME_LEN)) {
-                inode = yaf_iget(sb, yd->d_ino);
-                brelse(bh);
-                if (IS_ERR(inode)) {
-                    log(LOG_ERR, "yaf_iget() failed with error code %ld",
-                        PTR_ERR(inode));
-                    return ERR_CAST(inode);
-                }
-                goto out;
-            }
-        }
-
-        brelse(bh);
+        log(LOG_ERR, "_yaf_lookup() failed with error code %lld", doff);
+        return ERR_PTR(doff);
     }
+
+    bh = sb_bread(sb, DNO2BID(sb, yii->i_block[doff / DENTRYS_PER_BLOCK]));
+    if (!bh) {
+        log(LOG_ERR, "sb_bread() failed");
+        return ERR_PTR(-EIO);
+    }
+    yd = (Yaf_Dentry *)(bh->b_data + doff % DENTRYS_PER_BLOCK);
+
+    inode = yaf_iget(sb, yd->d_ino);
+    if (IS_ERR(inode)) {
+        log(LOG_ERR, "yaf_iget() failed with error code %ld",
+            PTR_ERR(inode));
+        brelse(bh);
+        return ERR_CAST(inode);
+    }
+
+    brelse(bh);
 
 out:
 
