@@ -1,7 +1,9 @@
 #include <linux/buffer_head.h>
 #include <linux/byteorder/generic.h>
+#include <linux/fs.h>
 #include <linux/gfp_types.h>
 #include <linux/slab.h>
+#include <linux/writeback.h>
 #include "../include/yaf.h"
 #include "../include/super.h"
 #include "../include/inode.h"
@@ -82,6 +84,40 @@ static void yaf_destroy_inode(struct inode *inode)
     kmem_cache_free(yaf_inode_cachep, yii);
 }
 
+/* write in-memory inode back to on-disk inode */
+static int yaf_write_inode(struct inode *inode,
+                           struct writeback_control *wbc)
+{
+    struct super_block *sb = inode->i_sb;
+    Yaf_Inode_Info *yii = YAF_INODE(inode);
+    Yaf_Inode *dyi;
+    struct buffer_head *bh;
+
+    bh = sb_bread(sb, INO2BID(sb, inode->i_ino));
+    if (!bh) {
+        return -EIO;
+        log(LOG_ERR, "sb_bread() failed");
+    }
+    dyi = (Yaf_Inode *)(bh->b_data + INO2BOFF(sb, inode->i_ino));
+
+    dyi->i_mode = cpu_to_le32(inode->i_mode);
+    dyi->i_uid = cpu_to_le32(i_uid_read(inode));
+    dyi->i_gid = cpu_to_le32(i_gid_read(inode));
+    dyi->i_nlink = cpu_to_le32(inode->i_nlink);
+    dyi->i_atime = cpu_to_le32(inode_get_atime_sec(inode));
+    dyi->i_mtime = cpu_to_le32(inode_get_mtime_sec(inode));
+    dyi->i_ctime = cpu_to_le32(inode_get_ctime_sec(inode));
+    dyi->i_size = cpu_to_le32(inode->i_size);
+    for (int i = 0; i < ARRAY_SIZE(yii->i_block); ++i) {
+        yii->i_block[i] = cpu_to_le32(yii->i_block[i]);
+    }
+
+    mark_buffer_dirty(bh);
+    brelse(bh);
+
+    return 0;
+}
+
 /*
  * This describes how the VFS can manipulate the superblock
  * of the yaf according to
@@ -94,6 +130,8 @@ static struct super_operations yaf_super_ops = {
     .destroy_inode = yaf_destroy_inode, /* this method is called to release
                                          * resources allocated for
                                          * *struct inode* */
+    .write_inode = yaf_write_inode,     /* this method is called when the VFS
+                                         * needs to write an inode to disk */
 };
 
 /*

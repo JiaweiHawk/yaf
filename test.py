@@ -106,6 +106,11 @@ if __name__ == "__main__":
         # umount the device
         qemu.execute("umount test")
 
+        # mount the device again
+        qemu.execute("mount -t yaf /dev/vda test")
+
+        qemu.execute("ls -a test", expect=".  ..  dir  file")
+
         # remove the yaf module
         qemu.execute("rmmod yaf")
     except:
