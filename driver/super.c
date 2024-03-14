@@ -109,7 +109,7 @@ static int yaf_write_inode(struct inode *inode,
     dyi->i_ctime = cpu_to_le32(inode_get_ctime_sec(inode));
     dyi->i_size = cpu_to_le32(inode->i_size);
     for (int i = 0; i < ARRAY_SIZE(yii->i_block); ++i) {
-        yii->i_block[i] = cpu_to_le32(yii->i_block[i]);
+        dyi->i_block[i] = cpu_to_le32(yii->i_block[i]);
     }
 
     mark_buffer_dirty(bh);
