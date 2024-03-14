@@ -45,7 +45,7 @@ static struct inode *yaf_new_inode(struct inode *dir, mode_t mode)
     cur = current_time(inode);
     inode_set_atime_to_ts(inode, cur);
     inode_set_mtime_to_ts(inode, cur);
-    inode_set_ctime_current(inode);
+    inode_set_ctime_to_ts(inode, cur);
     for (int i = 0; i < ARRAY_SIZE(yii->i_block); ++i) {
         yii->i_block[i] = 0;
     }
