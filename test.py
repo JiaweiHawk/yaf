@@ -136,7 +136,7 @@ if __name__ == "__main__":
 
         # delete random entrys
         for i in range(32 + random.randint(1, 16) + 32 + random.randint(1, 16)):
-            if (random.randint(0, 1) == 0 or len(dirs) == 0):
+            if ((random.randint(0, 1) == 0 and len(files)) or len(dirs) == 0):
                 # delete the random dir
                 qemu.execute("rmdir test/%s"%(dirs.pop(random.randint(0, len(dirs) - 1))))
             else:
