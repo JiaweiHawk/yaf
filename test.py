@@ -1,16 +1,11 @@
 #!/usr/bin/python3
 # -*- coding:utf-8 -*-
 import argparse
-import coloredlogs
-import logging
 import os
 import select
 import subprocess
 import sys
 import traceback
-import time
-
-logger = logging.getLogger(__file__)
 
 class QemuTerminate(Exception):
     pass
@@ -79,8 +74,6 @@ if __name__ == "__main__":
     ret = 0
     qemu:Qemu = None
 
-    coloredlogs.install(level=logging.INFO, logger=logger)
-
     parser = argparse.ArgumentParser(description="yaf test script")
     parser.add_argument("--command", action="store",
                         type=str, required=True,
@@ -88,18 +81,18 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     try:
-        logger.info("Boot up the Qemu")
+        # boot up the Qemu
         qemu = Qemu(command=args.command)
 
-        logger.info("insmod the yaf module")
+        # insmod the yaf module
         qemu.execute("insmod /mnt/shares/yaf.ko")
 
-        logger.info("format the disk device")
+        # format the disk device
         qemu.execute("/mnt/shares/mkfs /dev/vda")
 
         qemu.execute("mkdir -p test")
 
-        logger.info("mount the device")
+        # mount the device
         qemu.execute("mount -t yaf /dev/vda test")
 
         qemu.execute("ls -a test", expect=".  ..")
@@ -110,10 +103,10 @@ if __name__ == "__main__":
         qemu.execute("touch test/file")
         qemu.execute("ls -a test", expect=".  ..  dir  file")
 
-        logger.info("umount the device")
+        # umount the device
         qemu.execute("umount test")
 
-        logger.info("remove the yaf module")
+        # remove the yaf module
         qemu.execute("rmmod yaf")
     except:
         traceback.print_exc()
@@ -122,9 +115,4 @@ if __name__ == "__main__":
         if (qemu != None):
             qemu.kill()
 
-    print("")
-    if (ret == 0):
-        logger.info("test success")
-    else:
-        logger.error("test failed")
     sys.exit(ret)

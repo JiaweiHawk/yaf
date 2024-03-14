@@ -88,7 +88,6 @@ img:
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf test image'
 
 env: kernel rootfs srcs img
-	pip3 install argparse coloredlogs
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf environment'
 
 run:
