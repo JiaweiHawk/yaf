@@ -304,6 +304,76 @@ out:
     return NULL;
 }
 
+/* delete @dentry(a file or directory) in @dir */
+static int yaf_delete(struct inode *dir, struct dentry *dentry)
+{
+    struct super_block *sb = dir->i_sb;
+    Yaf_Inode_Info *yii = YAF_INODE(dir);
+    struct inode *inode = d_inode(dentry);
+    struct buffer_head *bh;
+    Yaf_Dentry *yd;
+    int64_t doff;
+    struct timespec64 cur;
+
+    doff = _yaf_lookup(dir, dentry);
+    assert(doff >= 0);
+
+    /* get the *Yaf_Dentry* in @dir  */
+    bh = sb_bread(sb, DNO2BID(sb, yii->i_block[doff / YAF_BLOCK_SIZE]));
+    if (!bh) {
+        log(LOG_ERR, "sb_bread() failed");
+        return -EIO;
+    }
+    yd = (Yaf_Dentry *)(bh->b_data + doff % YAF_BLOCK_SIZE);
+
+    /* remove @dentry from @dir */
+    yd->d_ino = cpu_to_le32(RESERVED_INO);
+
+    mark_buffer_dirty(bh);
+    brelse(bh);
+
+    /* update the @dir */
+    cur = current_time(dir);
+    inode_set_atime_to_ts(dir, cur);
+    inode_set_mtime_to_ts(dir, cur);
+    inode_set_ctime_to_ts(dir, cur);
+    drop_nlink(dir);
+    mark_inode_dirty(dir);
+
+    drop_nlink(inode);
+    if (inode->i_nlink > 1) {
+        /* there still other link for this inode */
+        mark_inode_dirty(inode);
+        return 0;
+    }
+
+    /* there is no other link, we can delete this inode */
+
+    /* clear the *i_block* */
+    yii = YAF_INODE(inode);
+    for (doff = 0; doff < inode->i_size; doff += YAF_BLOCK_SIZE) {
+        yaf_put_dblock(sb, yii->i_block[doff / YAF_BLOCK_SIZE]);
+    }
+
+    /* put the inode */
+    yaf_put_inode(sb, inode->i_ino);
+    mark_inode_dirty(inode);
+
+    return 0;
+}
+
+static int yaf_rmdir(struct inode *dir, struct dentry *dentry)
+{
+    struct inode *inode = d_inode(dentry);
+
+    /* check whether the directory is empty */
+    if (inode->i_nlink > 1) {
+        return -ENOTEMPTY;
+    }
+
+    return yaf_delete(dir, dentry);
+}
+
 /*
  * describes how the VFS can manipulate an inode according to
  * https://docs.kernel.org/next/filesystems/vfs.html#struct-inode-operations
@@ -315,6 +385,7 @@ static const struct inode_operations yaf_inode_ops = {
                                create subdirectories.*/
     .create = yaf_create,   /* called when the VFS needs to
                                create files.*/
+    .rmdir = yaf_rmdir,
 };
 
 /*
