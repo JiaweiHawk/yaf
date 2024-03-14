@@ -130,6 +130,20 @@ if __name__ == "__main__":
             qemu.execute("touch test/%s"%(name))
         check_directory()
 
+        # delete test
+        qemu.execute("rmdir test")
+        qemu.runtil("rmdir: failed to remove 'test': Device or resource busy", timeout=10)
+
+        # delete random entrys
+        for i in range(32 + random.randint(1, 16) + 32 + random.randint(1, 16)):
+            if (random.randint(0, 1) == 0 or len(dirs) == 0):
+                # delete the last dir
+                qemu.execute("rmdir test/%s"%(dirs[-1]))
+                dirs.pop()
+            else:
+                pass
+        check_directory()
+
         # umount the device
         qemu.execute("umount test")
 
