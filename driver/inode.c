@@ -66,6 +66,7 @@ static int64_t yaf_get_free_dentry(struct inode *dir)
     struct super_block *sb = dir->i_sb;
     uint64_t doff = 0;
     struct buffer_head *bh;
+    struct timespec64 cur;
 
     /* iterate diretory to find unsed dentry */
     while(doff < dir->i_size) {
@@ -112,8 +113,12 @@ static int64_t yaf_get_free_dentry(struct inode *dir)
     brelse(bh);
 
     /* mark dir inode is dirty */
-    mark_inode_dirty(dir);
     dir->i_size = doff + YAF_DENTRY_SIZE;
+    cur = current_time(dir);
+    inode_set_atime_to_ts(dir, cur);
+    inode_set_mtime_to_ts(dir, cur);
+    inode_set_ctime_to_ts(dir, cur);
+    mark_inode_dirty(dir);
     return doff;
 }
 
@@ -127,6 +132,7 @@ static int _yaf_create(struct mnt_idmap *id, struct inode *dir,
     struct buffer_head *bh;
     Yaf_Dentry *yd;
     struct inode *inode;
+    struct timespec64 cur;
 
     /* check @dentry name length */
     if (dentry->d_name.len > YAF_DENTRY_NAME_LEN) {
@@ -169,6 +175,14 @@ static int _yaf_create(struct mnt_idmap *id, struct inode *dir,
 
     mark_buffer_dirty(bh);
     brelse(bh);
+
+    /* update @dir */
+    cur = current_time(dir);
+    inode_set_atime_to_ts(dir, cur);
+    inode_set_mtime_to_ts(dir, cur);
+    inode_set_ctime_to_ts(dir, cur);
+    inc_nlink(dir);
+    mark_inode_dirty(dir);
 
     d_instantiate(dentry, inode);
 
