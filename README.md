@@ -17,9 +17,9 @@ With this image, you can try **YAF kernel module** and **YAF user-space tools** 
 Run the ```make run``` to boot up the qemu with **yak.ko** in **/mnt/shares** on guest and
 a test disk imgage **/dev/vda**
 
-## test with xfstests
+## test the yaf
 
-Run the ```make test``` to run the [xfstests](https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/) on the yaf environment
+Run the ```make test``` to run the tests on the yaf environment
 
 # Design
 

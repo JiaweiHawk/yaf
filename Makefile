@@ -88,6 +88,7 @@ img:
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf test image'
 
 env: kernel rootfs srcs img
+	pip3 install argparse coloredlogs
 	@echo -e '\033[0;32m[*]\033[0mbuild the yaf environment'
 
 run:
@@ -103,23 +104,4 @@ debug:
 		-S -gdb tcp::${PORT}
 
 test:
-	if [ ! -d ${PWD}/shares/xfstest ]; then \
-		git clone --depth 1 git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git ${PWD}/shares/xfstest; \
-		\
-		#install linux kernel header \
-		sudo chroot ${PWD}/rootfs /bin/bash -c "apt update && apt install -y make gcc rsync"; \
-		sudo mount --bind ${PWD}/kernel ${PWD}/rootfs/mnt && \
-			sudo chroot ${PWD}/rootfs /bin/bash -c "cd /mnt; make headers_install INSTALL_HDR_PATH=/usr" && \
-			sudo umount ${PWD}/rootfs/mnt; \
-		\
-		#install necessary packages \
-		sudo chroot ${PWD}/rootfs /bin/bash -c "apt update && apt install -y acl attr automake bc dbench dump e2fsprogs fio gawk gcc git indent libacl1-dev libaio-dev libcap-dev libgdbm-dev libtool libtool-bin liburing-dev libuuid1 lvm2 make psmisc python3 quota sed uuid-dev uuid-runtime xfsprogs sqlite3 libgdbm-compat-dev exfatprogs f2fs-tools ocfs2-tools udftools xfsdump xfslibs-dev"; \
-		pip3 install argparse coloredlogs; \
-		\
-		#build \
-		sudo mount --bind ${PWD}/shares ${PWD}/rootfs/mnt && \
-			sudo chroot ${PWD}/rootfs /bin/bash -c "cd /mnt/xfstest && make" && \
-			sudo umount ${PWD}/rootfs/mnt; \
-	fi
-
 	${PWD}/test.py --command='''${QEMU} ${QEMU_OPTIONS}'''

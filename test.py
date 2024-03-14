@@ -8,6 +8,7 @@ import select
 import subprocess
 import sys
 import traceback
+import time
 
 logger = logging.getLogger(__file__)
 
@@ -26,27 +27,33 @@ class Qemu:
 
         self._runtil("login:")
         self._write("root\n")
-        self._runtil(":~#")
 
-    def _read(self, timeout=1) -> None:
-        rset, _, _ = select.select([self.proc.stdout.fileno()], [], [], timeout)
+    def _read(self) -> None:
+        rset, _, _ = select.select([self.proc.stdout.fileno()], [], [], 1.0)
 
-        self.proc.poll()
-        if (self.proc.returncode != None):
-            raise QemuTerminate
+        if (rset == []):
+            self.proc.poll()
+            if (self.proc.returncode != None):
+                raise QemuTerminate
+            return
 
         self.outbytes += os.read(self.proc.stdout.fileno(), 4096)
         res = self.outbytes.decode("utf-8", "ignore")
         self.output += res
         self.outbytes = self.outbytes[len(res.encode("utf-8")):]
 
-    def _runtil(self, string:str) -> None:
+    def _runtil(self, string:str, timeout=0x3f3f3f3f) -> None:
         cursor = 0
         while(True):
             self._read()
             if (string in self.output):
                 break
             print(self.output[cursor:], end="", flush=True)
+
+            if (cursor == len(self.output)):
+                timeout -= 1
+            if (timeout == 0):
+                raise TimeoutError
             cursor = len(self.output)
 
         idx = self.output.find(string) + len(string)
@@ -58,9 +65,11 @@ class Qemu:
         self.proc.stdin.write(buf)
         self.proc.stdin.flush()
 
-    def execute(self, command:str) -> None:
+    def execute(self, command:str, expect:str=None, timeout=10) -> None:
+        self._runtil(":~#", timeout=10)
         self._write(command + "\n")
-        self._runtil(":~#")
+        if (expect != None):
+            self._runtil(expect, timeout=timeout)
 
     def kill(self) -> None:
         self.proc.kill()
@@ -93,13 +102,13 @@ if __name__ == "__main__":
         logger.info("mount the device")
         qemu.execute("mount -t yaf /dev/vda test")
 
-        qemu.execute("ls -a test")
+        qemu.execute("ls -a test", expect=".  ..")
 
         qemu.execute("mkdir -p test/dir")
-        qemu.execute("find test")
+        qemu.execute("ls -a test", expect=".  ..  dir")
 
         qemu.execute("touch test/file")
-        qemu.execute("find test")
+        qemu.execute("ls -a test", expect=".  ..  dir  file")
 
         logger.info("umount the device")
         qemu.execute("umount test")

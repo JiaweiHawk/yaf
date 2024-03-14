@@ -1,4 +1,4 @@
-name: xfstests
+name: tests
 
 on:
   push: {}
