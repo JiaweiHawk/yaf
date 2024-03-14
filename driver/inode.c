@@ -81,7 +81,7 @@ static int64_t yaf_get_free_dentry(struct inode *dir)
 
         yd = (Yaf_Dentry *)bh->b_data;
         for(int i = 0; i < DENTRYS_PER_BLOCK && doff < dir->i_size;
-            ++i, doff += YAF_DENTRY_SIZE) {
+            ++i, ++yd, doff += YAF_DENTRY_SIZE) {
             if (yd->d_ino == RESERVED_INO) {
                 brelse(bh);
                 return doff;
@@ -229,7 +229,7 @@ static struct dentry* yaf_lookup(struct inode *dir,
 
         yd = (Yaf_Dentry *)bh->b_data;
         for(int i = 0; i < DENTRYS_PER_BLOCK && doff < dir->i_size;
-            ++i, doff += YAF_DENTRY_SIZE) {
+            ++i, ++yd, doff += YAF_DENTRY_SIZE) {
             if (yd->d_ino != RESERVED_INO &&
                 !strncmp(yd->d_name, dentry->d_name.name,
                         YAF_DENTRY_NAME_LEN)) {
