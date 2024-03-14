@@ -362,6 +362,7 @@ static int yaf_delete(struct inode *dir, struct dentry *dentry)
     return 0;
 }
 
+/* delete directory @dentry in @dir */
 static int yaf_rmdir(struct inode *dir, struct dentry *dentry)
 {
     struct inode *inode = d_inode(dentry);
@@ -382,10 +383,11 @@ static const struct inode_operations yaf_inode_ops = {
     .lookup = yaf_lookup,   /* called when the VFS needs to
                     look up an inode in a parent directory */
     .mkdir = yaf_mkdir,     /* called when the VFS needs to
-                               create subdirectories.*/
+                               create subdirectories */
     .create = yaf_create,   /* called when the VFS needs to
-                               create files.*/
-    .rmdir = yaf_rmdir,
+                               create files */
+    .rmdir = yaf_rmdir,     /* called when the VFS needs to
+                               delete subdirectories */
 };
 
 /*
