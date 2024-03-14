@@ -6,6 +6,7 @@ import select
 import subprocess
 import sys
 import traceback
+import random
 
 class QemuTerminate(Exception):
     pass
@@ -20,7 +21,7 @@ class Qemu:
         self.output = ""
         self.outbytes = bytearray()
 
-        self._runtil("login:")
+        self.runtil("login:")
         self._write("root\n")
 
     def _read(self) -> None:
@@ -37,7 +38,7 @@ class Qemu:
         self.output += res
         self.outbytes = self.outbytes[len(res.encode("utf-8")):]
 
-    def _runtil(self, string:str, timeout=0x3f3f3f3f) -> None:
+    def runtil(self, string:str, timeout=0x3f3f3f3f) -> None:
         cursor = 0
         while(True):
             self._read()
@@ -60,11 +61,9 @@ class Qemu:
         self.proc.stdin.write(buf)
         self.proc.stdin.flush()
 
-    def execute(self, command:str, expect:str=None, timeout=10) -> None:
-        self._runtil(":~#", timeout=10)
+    def execute(self, command:str) -> None:
+        self.runtil(":~#", timeout=10)
         self._write(command + "\n")
-        if (expect != None):
-            self._runtil(expect, timeout=timeout)
 
     def kill(self) -> None:
         self.proc.kill()
@@ -83,6 +82,8 @@ if __name__ == "__main__":
     try:
         # boot up the Qemu
         qemu = Qemu(command=args.command)
+        dirs = []
+        files = []
 
         # insmod the yaf module
         qemu.execute("insmod /mnt/shares/yaf.ko")
@@ -95,13 +96,39 @@ if __name__ == "__main__":
         # mount the device
         qemu.execute("mount -t yaf /dev/vda test")
 
-        qemu.execute("ls -a test", expect=".  ..")
+        def check_directory():
+            qemu.execute("ls -al test")
 
-        qemu.execute("mkdir -p test/dir")
-        qemu.execute("ls -a test", expect=".  ..  dir")
+            # check entrys number
+            qemu.execute("ls -al test | wc -l")
+            qemu.runtil(str(len(dirs) + len(files) + 3), timeout=10)
 
-        qemu.execute("touch test/file")
-        qemu.execute("ls -a test", expect=".  ..  dir  file")
+            # check '.'
+            qemu.execute('''ls -al test | grep " \.$" | wc -l''')
+            qemu.runtil("1", timeout=10)
+
+            # check '..'
+            qemu.execute('''ls -al test | grep " \.\.$"''')
+            qemu.runtil("1", timeout=10)
+
+            # check each entrys
+            for name in dirs + files:
+                qemu.execute('''ls -al test | grep " %s$" | wc -l'''%(name))
+                qemu.runtil("1", timeout=10)
+
+        # add random subdirectorys
+        for i in range(64 + random.randint(1, 32)):
+            name = "dir%d"%(i)
+            dirs.append(name)
+            qemu.execute("mkdir -p test/%s"%(name))
+        check_directory()
+
+        # add random files
+        for i in range(64 + random.randint(1, 32)):
+            name = "file%d"%(i)
+            files.append(name)
+            qemu.execute("touch test/%s"%(name))
+        check_directory()
 
         # umount the device
         qemu.execute("umount test")
@@ -109,7 +136,7 @@ if __name__ == "__main__":
         # mount the device again
         qemu.execute("mount -t yaf /dev/vda test")
 
-        qemu.execute("ls -a test", expect=".  ..  dir  file")
+        check_directory()
 
         # remove the yaf module
         qemu.execute("rmmod yaf")
