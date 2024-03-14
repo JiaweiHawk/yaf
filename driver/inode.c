@@ -375,6 +375,12 @@ static int yaf_rmdir(struct inode *dir, struct dentry *dentry)
     return yaf_delete(dir, dentry);
 }
 
+/* delete file @dentry in @dir */
+static int yaf_unlink(struct inode *dir, struct dentry *dentry)
+{
+    return yaf_delete(dir, dentry);
+}
+
 /*
  * describes how the VFS can manipulate an inode according to
  * https://docs.kernel.org/next/filesystems/vfs.html#struct-inode-operations
@@ -388,6 +394,8 @@ static const struct inode_operations yaf_inode_ops = {
                                create files */
     .rmdir = yaf_rmdir,     /* called when the VFS needs to
                                delete subdirectories */
+    .unlink = yaf_unlink,   /* called when the VFS needs to
+                               delete inodes */
 };
 
 /*

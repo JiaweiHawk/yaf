@@ -141,7 +141,9 @@ if __name__ == "__main__":
                 qemu.execute("rmdir test/%s"%(dirs[-1]))
                 dirs.pop()
             else:
-                pass
+                # delete the last file
+                qemu.execute("rm test/%s"%(files[-1]))
+                files.pop()
         check_directory()
 
         # umount the device
