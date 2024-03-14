@@ -137,13 +137,11 @@ if __name__ == "__main__":
         # delete random entrys
         for i in range(32 + random.randint(1, 16) + 32 + random.randint(1, 16)):
             if (random.randint(0, 1) == 0 or len(dirs) == 0):
-                # delete the last dir
-                qemu.execute("rmdir test/%s"%(dirs[-1]))
-                dirs.pop()
+                # delete the random dir
+                qemu.execute("rmdir test/%s"%(dirs.pop(random.randint(0, len(dirs) - 1))))
             else:
-                # delete the last file
-                qemu.execute("rm test/%s"%(files[-1]))
-                files.pop()
+                # delete the random file
+                qemu.execute("rm test/%s"%(files.pop(random.randint(0, len(files) - 1))))
         check_directory()
 
         # umount the device
