@@ -5,9 +5,11 @@ import os
 import select
 import subprocess
 import sys
+import string
 import traceback
 import random
 import time
+import hashlib
 
 class QemuTerminate(Exception):
     pass
@@ -51,13 +53,12 @@ class Qemu:
             if (string in self.output):
                 break
             print(self.output[cursor:], end="", flush=True)
-
             if (time.time() - cur > timeout):
                 raise TimeoutError
             cursor = len(self.output)
 
         idx = self.output.find(string) + len(string)
-        print(self.output[cursor:idx], end="", flush=True)
+        #print(self.output[cursor:idx], end="", flush=True)
         self.output = self.output[idx:]
 
     def write(self, buf:str) -> None:
@@ -146,6 +147,42 @@ if __name__ == "__main__":
             qemu.execute("touch test/%s"%(name))
         check_directory()
 
+        # write random files
+        contents = {}
+
+        def check_files():
+            qemu.execute('''ls -al test/file*''')
+            for name in files:
+                if name in contents:
+                    qemu.execute("cat test/%s | wc -c"%(name))
+                    qemu.runtil(str(len(contents[name])), timeout=args.timeout)
+                    qemu.execute("md5sum test/%s"%(name))
+                    qemu.runtil(hashlib.md5(contents[name].encode("ascii")).hexdigest(), timeout=args.timeout)
+                    qemu.execute("sha256sum test/%s"%(name))
+                    qemu.runtil(hashlib.sha256(contents[name].encode("ascii")).hexdigest(), timeout=args.timeout)
+                    qemu.execute("sha512sum test/%s"%(name))
+                    qemu.runtil(hashlib.sha512(contents[name].encode("ascii")).hexdigest(), timeout=args.timeout)
+                else:
+                    qemu.execute("cat test/%s | wc -c"%(name))
+                    qemu.runtil(str(0), timeout=args.timeout)
+
+        max_filesize = 4096 * 8
+        step = 64
+        # write *wnumber* times making each file *max_filesize / 2* bytes
+        wnumber = int(max_filesize / 2 * len(files) / step)
+        for i in range(wnumber):
+            name = files[random.randint(0, len(files) - 1)]
+            content = ''.join(random.choice(string.digits) for _ in range(step))
+            if name in contents:
+                if (len(contents[name] + content) >= max_filesize):
+                    continue
+                contents[name] += content
+                qemu.execute('''echo -n "%s" >> test/%s'''%(content, name))
+            else:
+                contents[name] = content
+                qemu.execute('''echo -n "%s" > test/%s'''%(content, name))
+        check_files()
+
         # delete test
         qemu.execute("rmdir test")
         qemu.runtil("rmdir: failed to remove 'test': Device or resource busy", timeout=args.timeout)
@@ -157,8 +194,10 @@ if __name__ == "__main__":
                 qemu.execute("rmdir test/%s"%(dirs.pop(random.randint(0, len(dirs) - 1))))
             else:
                 # delete the random file
-                qemu.execute("rm test/%s"%(files.pop(random.randint(0, len(files) - 1))))
-        check_directory()
+                name = random.randint(0, len(files) - 1)
+                if (name in contents):
+                    contents.pop(name)
+                qemu.execute("rm test/%s"%(files.pop(name)))
 
         # umount the device
         qemu.execute("umount test")
@@ -167,6 +206,7 @@ if __name__ == "__main__":
         qemu.execute("mount -t yaf /dev/vda test")
 
         check_directory()
+        check_files()
 
         # remove the yaf module
         qemu.execute("rmmod yaf")
