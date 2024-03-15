@@ -43,7 +43,7 @@ uint32_t yaf_get_free_inode(struct super_block *sb) {
         if (res >= 0) {
             mark_buffer_dirty(bh);
             brelse(bh);
-            return res;
+            return res + (bid - BID_IBP_MIN(sb)) * BITS_PER_BLOCK;
         }
 
         brelse(bh);
@@ -82,7 +82,7 @@ uint32_t yaf_get_free_dblock(struct super_block *sb) {
         if (res >= 0) {
             brelse(bh);
             mark_buffer_dirty(bh);
-            return res;
+            return res + (bid - BID_DBP_MIN(sb)) * BITS_PER_BLOCK;
         }
 
         brelse(bh);
