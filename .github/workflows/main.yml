@@ -20,3 +20,8 @@ jobs:
     - name: run the test suite
       run: |
         sudo make test
+
+    - uses: actions/upload-artifact@v3
+      with:
+        name: setup
+        path: ./shares/setup.sh

@@ -13,7 +13,7 @@ class QemuTerminate(Exception):
 
 class Qemu:
 
-    def __init__(self, command:str):
+    def __init__(self, command:str, history:str):
 
         self.proc = subprocess.Popen("exec " + command, shell=True,
                                      stdout=subprocess.PIPE,
@@ -23,6 +23,12 @@ class Qemu:
 
         self.runtil("login:")
         self._write("root\n")
+
+        self.history = history
+
+        with open(history, "w") as f:
+            f.truncate()
+            f.write("#!/bin/bash\n")
 
     def _read(self) -> None:
         rset, _, _ = select.select([self.proc.stdout.fileno()], [], [], 1.0)
@@ -62,6 +68,9 @@ class Qemu:
         self.proc.stdin.flush()
 
     def execute(self, command:str) -> None:
+        with open(self.history, "a") as f:
+            f.write(command + "\n")
+
         self.runtil(":~#", timeout=10)
         self._write(command + "\n")
 
@@ -77,11 +86,14 @@ if __name__ == "__main__":
     parser.add_argument("--command", action="store",
                         type=str, required=True,
                         help="command to boot up qemu")
+    parser.add_argument("--history", action="store",
+                        type=str, required=True,
+                        help="path to store executed commands")
     args = parser.parse_args()
 
     try:
         # boot up the Qemu
-        qemu = Qemu(command=args.command)
+        qemu = Qemu(command=args.command, history=args.history)
         dirs = []
         files = []
 

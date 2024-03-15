@@ -103,4 +103,4 @@ debug:
 		-S -gdb tcp::${PORT}
 
 test:
-	${PWD}/test.py --command='''${QEMU} ${QEMU_OPTIONS}'''
+	${PWD}/test.py --command='''${QEMU} ${QEMU_OPTIONS}''' --history=${PWD}/shares/setup.sh
