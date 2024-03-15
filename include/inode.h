@@ -147,6 +147,9 @@
     #define DENTRYS_PER_BLOCK   (YAF_BLOCK_SIZE / YAF_DENTRY_SIZE)
     #define MAX_DENTRYS         (YAF_IBLOCKS * DENTRYS_PER_BLOCK)
 
+    /* max number of file size */
+    #define MAX_FILESIZE        (YAF_BLOCK_SIZE * YAF_IBLOCKS)
+
     #define YAF_INODE(inode) \
         ((Yaf_Inode_Info *)container_of(inode, Yaf_Inode_Info, vfs_inode))
 
