@@ -48,7 +48,7 @@ static struct inode *yaf_new_inode(struct inode *dir, mode_t mode)
     inode_set_mtime_to_ts(inode, cur);
     inode_set_ctime_to_ts(inode, cur);
     for (int i = 0; i < ARRAY_SIZE(yii->i_block); ++i) {
-        yii->i_block[i] = 0;
+        yii->i_block[i] = RESERVED_DNO;
     }
     if (S_ISDIR(inode->i_mode)) {
         inode->i_fop = &yaf_dir_ops;
@@ -105,6 +105,7 @@ static int64_t yaf_get_free_dentry(struct inode *dir)
             log(LOG_ERR, "there is not free data block on the disk");
             return -ENOSPC;
         }
+        assert(dyii->i_block[doff / YAF_BLOCK_SIZE] == RESERVED_DNO);
         dyii->i_block[doff / YAF_BLOCK_SIZE] = dno;
     }
 

@@ -215,7 +215,9 @@ static long write_inode_blocks(int bfd, Yaf_Superblock *ysb) {
     root.i_nlink = htole32(1);
     root.i_atime = root.i_mtime = root.i_ctime = htole32(0);
     root.i_size = 0;
-    memset(&root.i_block, 0, sizeof(root.i_block));
+    for (int i = 0; i < YAF_IBLOCKS; ++i) {
+        root.i_block[i] = RESERVED_DNO;
+    }
 
     /* write down the root inode */
     ret = lseek(bfd, INO2DOFF(ysb, ROOT_INO), SEEK_SET);
