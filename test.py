@@ -7,6 +7,7 @@ import subprocess
 import sys
 import traceback
 import random
+import time
 
 class QemuTerminate(Exception):
     pass
@@ -21,8 +22,6 @@ class Qemu:
         self.output = ""
         self.outbytes = bytearray()
 
-        self.runtil("login:")
-        self._write("root\n")
 
         self.history = history
 
@@ -31,7 +30,7 @@ class Qemu:
             f.write("#!/bin/bash\n")
 
     def _read(self) -> None:
-        rset, _, _ = select.select([self.proc.stdout.fileno()], [], [], 1.0)
+        rset, _, _ = select.select([self.proc.stdout.fileno()], [], [], 1)
 
         if (rset == []):
             self.proc.poll()
@@ -44,17 +43,16 @@ class Qemu:
         self.output += res
         self.outbytes = self.outbytes[len(res.encode("utf-8")):]
 
-    def runtil(self, string:str, timeout=0x3f3f3f3f) -> None:
+    def runtil(self, string:str, timeout:int) -> None:
         cursor = 0
+        cur = time.time()
         while(True):
             self._read()
             if (string in self.output):
                 break
             print(self.output[cursor:], end="", flush=True)
 
-            if (cursor == len(self.output)):
-                timeout -= 1
-            if (timeout == 0):
+            if (time.time() - cur > timeout):
                 raise TimeoutError
             cursor = len(self.output)
 
@@ -62,7 +60,7 @@ class Qemu:
         print(self.output[cursor:idx], end="", flush=True)
         self.output = self.output[idx:]
 
-    def _write(self, buf:str) -> None:
+    def write(self, buf:str) -> None:
         buf:bytes = buf.encode("utf-8")
         self.proc.stdin.write(buf)
         self.proc.stdin.flush()
@@ -71,8 +69,8 @@ class Qemu:
         with open(self.history, "a") as f:
             f.write(command + "\n")
 
-        self.runtil(":~#", timeout=10)
-        self._write(command + "\n")
+        self.runtil(":~#", timeout=60)
+        self.write(command + "\n")
 
     def kill(self) -> None:
         self.proc.kill()
@@ -89,6 +87,9 @@ if __name__ == "__main__":
     parser.add_argument("--history", action="store",
                         type=str, required=True,
                         help="path to store executed commands")
+    parser.add_argument("--timeout", action="store",
+                        type=int, default=10,
+                        help="max timeout for receiving from guest")
     args = parser.parse_args()
 
     try:
@@ -96,6 +97,9 @@ if __name__ == "__main__":
         qemu = Qemu(command=args.command, history=args.history)
         dirs = []
         files = []
+
+        qemu.runtil("login:", timeout=args.timeout)
+        qemu.write("root\n")
 
         # insmod the yaf module
         qemu.execute("insmod /mnt/shares/yaf.ko")
@@ -113,20 +117,20 @@ if __name__ == "__main__":
 
             # check entrys number
             qemu.execute("ls -al test | wc -l")
-            qemu.runtil(str(len(dirs) + len(files) + 3), timeout=10)
+            qemu.runtil(str(len(dirs) + len(files) + 3), timeout=args.timeout)
 
             # check '.'
             qemu.execute('''ls -al test | grep " \.$" | wc -l''')
-            qemu.runtil("1", timeout=10)
+            qemu.runtil("1", timeout=args.timeout)
 
             # check '..'
             qemu.execute('''ls -al test | grep " \.\.$"''')
-            qemu.runtil("1", timeout=10)
+            qemu.runtil("1", timeout=args.timeout)
 
             # check each entrys
             for name in dirs + files:
                 qemu.execute('''ls -al test | grep " %s$" | wc -l'''%(name))
-                qemu.runtil("1", timeout=10)
+                qemu.runtil("1", timeout=args.timeout)
 
         # add random subdirectorys
         for i in range(64 + random.randint(1, 32)):
@@ -144,7 +148,7 @@ if __name__ == "__main__":
 
         # delete test
         qemu.execute("rmdir test")
-        qemu.runtil("rmdir: failed to remove 'test': Device or resource busy", timeout=10)
+        qemu.runtil("rmdir: failed to remove 'test': Device or resource busy", timeout=args.timeout)
 
         # delete random entrys
         for i in range(32 + random.randint(1, 16) + 32 + random.randint(1, 16)):
