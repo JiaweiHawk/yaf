@@ -1,2 +1,2 @@
 obj-m	:= yaf.o
-yaf-y 	:= bitmap.o dir.o fs.o inode.o super.o
+yaf-y 	:= bitmap.o dir.o file.o fs.o inode.o super.o

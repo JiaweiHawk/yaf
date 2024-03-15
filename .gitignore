@@ -13,6 +13,7 @@
 driver/*
 !driver/bitmap.c
 !driver/dir.c
+!driver/file.c
 !driver/fs.c
 !driver/inode.c
 !driver/Makefile
@@ -30,6 +31,7 @@ tool/*
 include/*
 !include/bitmap.h
 !include/dir.h
+!include/file.h
 !include/fs.h
 !include/inode.h
 !include/super.h

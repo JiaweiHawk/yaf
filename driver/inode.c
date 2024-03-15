@@ -6,6 +6,7 @@
 #include <linux/mnt_idmapping.h>
 #include <linux/time64.h>
 #include "../include/bitmap.h"
+#include "../include/file.h"
 #include "../include/dir.h"
 #include "../include/inode.h"
 #include "../include/yaf.h"
@@ -51,6 +52,9 @@ static struct inode *yaf_new_inode(struct inode *dir, mode_t mode)
     }
     if (S_ISDIR(inode->i_mode)) {
         inode->i_fop = &yaf_dir_ops;
+    } else if (S_ISREG(inode->i_mode)) {
+        inode->i_fop = &yaf_file_ops;
+        inode->i_mapping->a_ops = &yaf_as_ops;
     }
 
     /* mark inode is dirty */
@@ -450,6 +454,9 @@ struct inode* yaf_iget(struct super_block *sb, unsigned long ino) {
     }
     if (S_ISDIR(inode->i_mode)) {
         inode->i_fop = &yaf_dir_ops;
+    } else if (S_ISREG(inode->i_mode)) {
+        inode->i_fop = &yaf_file_ops;
+        inode->i_mapping->a_ops = &yaf_as_ops;
     }
 
     /* unlock the inode to make it available */

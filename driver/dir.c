@@ -75,7 +75,7 @@ static int yaf_iterate_shared(struct file *dir, struct dir_context *ctx) {
 }
 
 /*
- * describes how the VFS can manipulate an open file accroding to
+ * describes how the VFS can manipulate an open directory accroding to
  * https://docs.kernel.org/next/filesystems/vfs.html#struct-file-operations
  */
 const struct file_operations yaf_dir_ops = {
