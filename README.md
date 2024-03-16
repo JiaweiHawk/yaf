@@ -21,6 +21,10 @@ a test disk imgage **/dev/vda**
 
 Run the ```make test``` to run the tests on the yaf environment
 
+## debug the yaf
+
+Run the ```make debug``` to debug the **yaf kernel module** on the yaf environment
+
 # Design
 
 ## Partition layout
