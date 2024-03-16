@@ -217,8 +217,13 @@ if __name__ == "__main__":
         check_directory()
         check_files()
 
+        # umount the device
+        qemu.execute("umount test")
+
         # remove the yaf module
         qemu.execute("rmmod yaf")
+        qemu.runtil("cleanup filesystem", timeout=args.timeout)
+
     except:
         traceback.print_exc()
         ret = -1
