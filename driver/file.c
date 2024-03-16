@@ -158,4 +158,6 @@ const struct file_operations yaf_file_ops = {
                                                read the file content */
     .write_iter = generic_file_write_iter,  /* called when the VFS needs to
                                                write the file */
+    .llseek = generic_file_llseek,          /* called when the VFS needs to
+                                            move the file position index */
 };

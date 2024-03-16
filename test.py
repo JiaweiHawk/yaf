@@ -183,6 +183,15 @@ if __name__ == "__main__":
                 qemu.execute('''echo -n "%s" > test/%s'''%(content, name))
         check_files()
 
+        for name, content in contents.items():
+            offset = random.randint(2, len(content))
+            qemu.execute("tail --bytes=+%d test/%s | md5sum -"%(offset, name))
+            qemu.runtil(hashlib.md5(content[offset-1:].encode("ascii")).hexdigest(), timeout=args.timeout)
+            qemu.execute("tail --bytes=+%d test/%s | sha256sum -"%(offset, name))
+            qemu.runtil(hashlib.sha256(content[offset-1:].encode("ascii")).hexdigest(), timeout=args.timeout)
+            qemu.execute("tail --bytes=+%d test/%s | sha512sum -"%(offset, name))
+            qemu.runtil(hashlib.sha512(content[offset-1:].encode("ascii")).hexdigest(), timeout=args.timeout)
+
         # delete test
         qemu.execute("rmdir test")
         qemu.runtil("rmdir: failed to remove 'test': Device or resource busy", timeout=args.timeout)
