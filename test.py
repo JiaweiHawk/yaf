@@ -58,7 +58,7 @@ class Qemu:
             cursor = len(self.output)
 
         idx = self.output.find(string) + len(string)
-        #print(self.output[cursor:idx], end="", flush=True)
+        print(self.output[cursor:idx], end="", flush=True)
         self.output = self.output[idx:]
 
     def write(self, buf:str) -> None:
